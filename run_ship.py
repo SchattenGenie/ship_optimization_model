@@ -21,10 +21,10 @@ client = docker.from_env()
 
 def create_job(host_dir, container_dir, command="/bin/sh -c 'head -1 input.txt > output.txt'"):
     container = client.containers.run(
+        image='vbelavin/ship_simple_model',
         privileged=True,
         remove=False,
         detach=False,
-        hostname='dev',
         tty=True,
         command=command,
         stdin_open=True,
