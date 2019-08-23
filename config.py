@@ -3,6 +3,6 @@
 
 # parameters of server
 HOST = '0.0.0.0'
-PORT = '64432'
+PORT = '54432'
 HOST_DIRECTORY = '/mnt/belavin/temp'
 CONTAINER_DIRECTORY = '/root/temp'
