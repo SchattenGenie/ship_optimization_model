@@ -45,7 +45,7 @@ def run_simulation(magnet_config):
 
     # save magnet config for ship
     # in host directory
-    magnet_config_path = os.path.join(host_dir, 'magnet_conig.json')
+    magnet_config_path = os.path.join(host_dir, 'magnet_config.json')
     with open(magnet_config_path, 'w', encoding='utf-8') as f:
         json.dump(magnet_config, f, ensure_ascii=False, indent=4)
 
@@ -75,8 +75,8 @@ def run_simulation(magnet_config):
     veto_points_minus = np.load('{0}/output_antimu/veto_points.npy'.format(host_dir))
 
     result = {
-        'muons_momentum': np.contacenate([muons_momentum_plus, muons_momentum_minus], axis=0),
-        'veto_points': np.contacenate([veto_points_plus, veto_points_minus], axis=0)
+        'muons_momentum': np.concatenate([muons_momentum_plus, muons_momentum_minus], axis=0).tolist(),
+        'veto_points': np.concatenate([veto_points_plus, veto_points_minus], axis=0).tolist()
     }
 
     return result

@@ -15,6 +15,7 @@ RUN cd /root && git clone https://github.com/SchattenGenie/ship_optimization_mod
 
 USER root
 EXPOSE 6432
+EXPOSE 64432
 WORKDIR /root/ship_optimization_model
 
-CMD [ "a", "--ini", "app.ini" ]
+CMD [ "uwsgi", "--ini", "app.ini" ]
