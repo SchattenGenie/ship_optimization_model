@@ -6,7 +6,6 @@ import subprocess
 import shutil
 import json
 import hashlib
-from schema import Schema, Use, Optional, Or
 from collections import defaultdict
 import time
 import requests
@@ -14,7 +13,8 @@ import config
 import docker
 import uuid
 import docker
-from shutil import copyfile
+from shutil import copy
+
 
 client = docker.from_env()
 
@@ -47,7 +47,7 @@ def run_simulation(magnet_config):
         json.dump(magnet_config, f, ensure_ascii=False, indent=4)
 
     # copy preprocessing file to destination
-    copyfile('./preprocess_root_file.py', host_dir)
+    copy('./preprocess_root_file.py', host_dir)
 
     # set container dir
     container_dir = '/root/host_directory'

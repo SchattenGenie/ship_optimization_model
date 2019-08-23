@@ -18,7 +18,7 @@ def simulate():
     return result
 
 
-@app.rout('/retrieve_result', method=['POST'])
+@app.route('/retrieve_result', methods=['POST'])
 def retrieve_result():
     data = json.loads(flask_request.data)
     result = get_result(data['uiid'])
