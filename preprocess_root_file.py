@@ -45,8 +45,8 @@ def process_file(filename):
             muons.extend(muon)
             veto_points.extend(muon_veto_points)
 
-    np.save(os.path.join(directory, "muons_momentum.npz"), np.array(muons))
-    np.save(os.path.join(directory, "veto_points.npz"), np.array(veto_points))
+    np.save(os.path.join(directory, "muons_momentum"), np.array(muons))
+    np.save(os.path.join(directory, "veto_points"), np.array(veto_points))
 
 
 if __name__ == "__main__":

@@ -28,7 +28,8 @@ def create_job(host_dir, container_dir, command="/bin/sh -c 'head -1 input.txt >
         tty=True,
         command=command,
         stdin_open=True,
-        mounts=[docker.types.Mount(host_dir, container_dir)]
+        stderr=True,
+        volumes={container_dir: {'bind': host_dir, 'mode': 'rw'}}
     )
     return container
 
@@ -53,10 +54,10 @@ def run_simulation(magnet_config):
     container_dir = '/root/host_directory'
     magnet_config_path_container = os.path.join(container_dir, 'magnet_conig.json')
 
-    # run docker
+    """# run docker
     command = [
         # setup env
-        "alienv enter -w /sw FairShip/latest",
+        # "alienv enter -w /sw FairShip/latest",
         # copy magnet config
         "cp {} $FAIRSHIP/diff-model".format(magnet_config_path_container),
         # run with muon
@@ -68,16 +69,16 @@ def run_simulation(magnet_config):
         # run preprocessing
         "python {0}/preprocess_root_file.py {0}/output_mu/ship.conical.PG_13-TGeant4.root".format(container_dir),
         "python {0}/preprocess_root_file.py {0}/output_mu/ship.conical.PG_13-TGeant4.root".format(container_dir)
-    ]
+    ]"""
 
-    command = " && ".join(command)
-    create_job(host_dir=host_dir, container_dir=container_dir, command=command)
+    # command = " && ".join(command)
+    create_job(host_dir=host_dir, container_dir=container_dir)
 
-    muons_momentum_plus = np.load('{0}/output_mu/muons_momentum.npz'.format(host_dir))
-    muons_momentum_minus = np.load('{0}/output_antimu/muons_momentum.npz'.format(host_dir))
+    muons_momentum_plus = np.load('{0}/output_mu/muons_momentum.npy'.format(host_dir))
+    muons_momentum_minus = np.load('{0}/output_antimu/muons_momentum.npy'.format(host_dir))
 
-    veto_points_plus = np.load('{0}/output_mu/veto_points.npz'.format(host_dir))
-    veto_points_minus = np.load('{0}/output_antimu/veto_points.npz'.format(host_dir))
+    veto_points_plus = np.load('{0}/output_mu/veto_points.npy'.format(host_dir))
+    veto_points_minus = np.load('{0}/output_antimu/veto_points.npy'.format(host_dir))
 
     result = {
         'muons_momentum': np.contacenate([muons_momentum_plus, muons_momentum_minus], axis=0),
