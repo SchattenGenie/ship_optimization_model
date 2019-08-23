@@ -37,8 +37,10 @@ def create_job(host_dir, container_dir, command):
 def run_simulation(magnet_config):
     # make random directory for ship docker
     # to store input files and output files
-    host_dir = '{}/input_dir_{}'.format(config.HOST_DIRECTORY, str(uuid.uuid4()))
+    input_dir = 'input_dir_{}'.format(str(uuid.uuid4()))
+    host_dir = '{}/{}'.format(config.CONTAINER_DIRECTORY, input_dir)
     host_dir = os.path.abspath(host_dir)
+    host_outer_dir = '{}/{}'.format(config.HOST_DIRECTORY, input_dir)
     os.mkdir(host_dir)
 
     # save magnet config for ship
@@ -57,7 +59,7 @@ def run_simulation(magnet_config):
     # create_job(host_dir=host_dir, container_dir=container_dir)
     process = subprocess.Popen([
         "docker", "run", "-v",
-        "{}:{}:rw".format(host_dir, container_dir),
+        "{}:{}:rw".format(host_outer_dir, container_dir),
         "vbelavin/ship_simple_model"
     ],
         stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
