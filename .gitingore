@@ -1,0 +1,5 @@
+*.pyc
+*.pem
+*.cer
+*.log
+.ipynb_checkpoints
