@@ -14,19 +14,19 @@ import docker
 import uuid
 import docker
 from shutil import copy
-
+import numpy as np
+import config
 
 client = docker.from_env()
 
 
-def create_job(host_dir, container_dir, command="/bin/sh -c 'head -1 input.txt > output.txt'"):
+def create_job(host_dir, container_dir, command):
     container = client.containers.run(
         image='vbelavin/ship_simple_model',
-        privileged=True,
         remove=False,
         detach=False,
-        tty=True,
         command=command,
+        tty=True,
         stdin_open=True,
         stderr=True,
         volumes={container_dir: {'bind': host_dir, 'mode': 'rw'}}
@@ -37,7 +37,7 @@ def create_job(host_dir, container_dir, command="/bin/sh -c 'head -1 input.txt >
 def run_simulation(magnet_config):
     # make random directory for ship docker
     # to store input files and output files
-    host_dir = './input_dir_{}'.format(str(uuid.uuid4()))
+    host_dir = '{}/input_dir_{}'.format(config.HOST_DIRECTORY, str(uuid.uuid4()))
     host_dir = os.path.abspath(host_dir)
     os.mkdir(host_dir)
 
@@ -52,27 +52,19 @@ def run_simulation(magnet_config):
 
     # set container dir
     container_dir = '/root/host_directory'
-    magnet_config_path_container = os.path.join(container_dir, 'magnet_conig.json')
 
-    """# run docker
-    command = [
-        # setup env
-        # "alienv enter -w /sw FairShip/latest",
-        # copy magnet config
-        "cp {} $FAIRSHIP/diff-model".format(magnet_config_path_container),
-        # run with muon
-        "python $FAIRSHIP/macro/run_simScript.py --PG --pID 13 -n 100 --Estart 1 --Eend 10 --FastMuon -o {}/output_mu".format(
-            container_dir),
-        # run with anti muon
-        "python $FAIRSHIP/macro/run_simScript.py --PG --pID -13 -n 100 --Estart 1 --Eend 10 --FastMuon -o {}/output_antimu".format(
-            container_dir),
-        # run preprocessing
-        "python {0}/preprocess_root_file.py {0}/output_mu/ship.conical.PG_13-TGeant4.root".format(container_dir),
-        "python {0}/preprocess_root_file.py {0}/output_mu/ship.conical.PG_13-TGeant4.root".format(container_dir)
-    ]"""
+    # command = "/bin/sh -c run_simulation.sh".format(host_dir)
+    # create_job(host_dir=host_dir, container_dir=container_dir)
+    process = subprocess.Popen([
+        "docker", "run", "-v",
+        "{}:{}:rw".format(host_dir, container_dir),
+        "vbelavin/ship_simple_model"
+    ],
+        stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
-    # command = " && ".join(command)
-    create_job(host_dir=host_dir, container_dir=container_dir)
+    for line in process.stdout:
+        print(line)
+    process.wait()
 
     muons_momentum_plus = np.load('{0}/output_mu/muons_momentum.npy'.format(host_dir))
     muons_momentum_minus = np.load('{0}/output_antimu/muons_momentum.npy'.format(host_dir))
@@ -84,4 +76,5 @@ def run_simulation(magnet_config):
         'muons_momentum': np.contacenate([muons_momentum_plus, muons_momentum_minus], axis=0),
         'veto_points': np.contacenate([veto_points_plus, veto_points_minus], axis=0)
     }
+
     return result
