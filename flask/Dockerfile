@@ -14,8 +14,7 @@ RUN apt-get update && \
 RUN cd /root && git clone https://github.com/SchattenGenie/ship_optimization_model.git
 
 USER root
-EXPOSE 6432
-EXPOSE 54432
+EXPOSE 5432
 WORKDIR /root/ship_optimization_model
 
 CMD [ "uwsgi", "--ini", "app.ini" ]
