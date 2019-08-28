@@ -17,7 +17,7 @@ def simulate():
     result = run_ship.run_simulation(magnet_config)
     return result
 
-
+# TODO: lazy evaluation
 @app.route('/retrieve_result', methods=['POST'])
 def retrieve_result():
     data = json.loads(flask_request.data)

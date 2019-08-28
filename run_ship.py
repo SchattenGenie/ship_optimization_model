@@ -55,8 +55,11 @@ def run_simulation(magnet_config):
     # set container dir
     container_dir = '/root/host_directory'
 
-    # command = "/bin/sh -c run_simulation.sh".format(host_dir)
-    # create_job(host_dir=host_dir, container_dir=container_dir)
+    # TODO: use python docker sdk
+    num_repetitions = 1000
+    command = "alienv setenv -w /sw FairShip/latest -c /run_simulation.sh {}".format(num_repetitions)
+    create_job(host_dir=host_dir, container_dir=container_dir, command=command)
+    """
     process = subprocess.Popen([
         "docker", "run", "-v",
         "{}:{}:rw".format(host_outer_dir, container_dir),
@@ -67,7 +70,7 @@ def run_simulation(magnet_config):
     for line in process.stdout:
         print(line)
     process.wait()
-
+    """
     muons_momentum_plus = np.load('{0}/output_mu/muons_momentum.npy'.format(host_dir))
     muons_momentum_minus = np.load('{0}/output_antimu/muons_momentum.npy'.format(host_dir))
 

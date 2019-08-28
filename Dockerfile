@@ -7,4 +7,4 @@ RUN mkdir /sw/slc7_x86-64/FairRoot/latest/include/source && cp /sw/slc7_x86-64/F
 COPY run_simulation.sh ./
 RUN chmod +x run_simulation.sh
 
-ENTRYPOINT bash /run_simulation.sh
+# ENTRYPOINT ["alienv", "setenv", "-w", "/sw FairShip/latest", "-c", "/run_simulation.sh"]
