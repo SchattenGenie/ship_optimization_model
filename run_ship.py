@@ -33,10 +33,10 @@ def create_job(host_dir, container_dir, command):
     return container
 
 
-def run_simulation(magnet_config, job_uiid):
+def run_simulation(magnet_config, job_uuid):
     # make random directory for ship docker
     # to store input files and output files
-    input_dir = 'input_dir_{}'.format(job_uiid)
+    input_dir = 'input_dir_{}'.format(job_uuid)
     host_dir = '{}/{}'.format(config.CONTAINER_DIRECTORY, input_dir)
     host_dir = os.path.abspath(host_dir)
     host_outer_dir = '{}/{}'.format(config.HOST_DIRECTORY, input_dir)
@@ -59,12 +59,12 @@ def run_simulation(magnet_config, job_uiid):
     command = "alienv setenv -w /sw FairShip/latest -c /run_simulation.sh {}".format(num_repetitions)
     container = create_job(host_dir=host_outer_dir, container_dir=container_dir, command=command)
     result = {
-        'uiid': job_uiid,
+        'uuid': job_uuid,
         'container_id': container.id,
         'container_status': container.status
     }
 
-    redis.set(job_uiid, json.dumps(result))
+    redis.set(job_uuid, json.dumps(result))
     container.wait()
 
     muons_momentum_plus = np.load('{0}/output_mu/muons_momentum.npy'.format(host_dir))
@@ -75,18 +75,18 @@ def run_simulation(magnet_config, job_uiid):
 
     container.reload()
     result = {
-        'uiid': job_uiid,
+        'uuid': job_uuid,
         'container_id': container.id,
         'container_status': container.status,
         'muons_momentum': np.concatenate([muons_momentum_plus, muons_momentum_minus], axis=0).tolist(),
         'veto_points': np.concatenate([veto_points_plus, veto_points_minus], axis=0).tolist()
     }
-    redis.set(job_uiid, json.dumps(result))
+    redis.set(job_uuid, json.dumps(result))
     return result
 
 
-def get_result(job_uiid):
-    result = redis.get(job_uiid)
+def get_result(job_uuid):
+    result = redis.get(job_uuid)
     if result is None:
         return 'No key'
     result = json.loads(result)
