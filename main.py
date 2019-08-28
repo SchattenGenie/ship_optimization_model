@@ -17,7 +17,7 @@ def simulate():
     magnet_config = json.loads(flask_request.data)
     job_uuid = str(uuid.uuid4())
     Thread(target=run_ship.run_simulation, kwargs=dict(magnet_config=magnet_config, job_uuid=job_uuid)).start()
-    return job_uiid
+    return job_uuid
 
 # TODO: lazy evaluation
 @app.route('/retrieve_result', methods=['POST'])
