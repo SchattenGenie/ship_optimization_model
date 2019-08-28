@@ -7,7 +7,7 @@ from threading import Thread
 import config
 import run_ship
 import json
-import uiid
+import uuid
 
 app = Flask(__name__)
 

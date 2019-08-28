@@ -28,7 +28,7 @@ def create_job(host_dir, container_dir, command):
         image='vbelavin/ship_simple_model',
         detach=True,
         command=command,
-        volumes={container_dir: {'bind': host_dir, 'mode': 'rw'}}
+        volumes={host_dir: {'bind': container_dir, 'mode': 'rw'}}
     )
     return container
 
@@ -55,16 +55,16 @@ def run_simulation(magnet_config, job_uiid):
     container_dir = '/root/host_directory'
 
     # TODO: use python docker sdk
-    num_repetitions = 1000
+    num_repetitions = magnet_config.get('num_repetitions', 100)
     command = "alienv setenv -w /sw FairShip/latest -c /run_simulation.sh {}".format(num_repetitions)
-    container = create_job(host_dir=host_dir, container_dir=container_dir, command=command)
+    container = create_job(host_dir=host_outer_dir, container_dir=container_dir, command=command)
     result = {
         'uiid': job_uiid,
         'container_id': container.id,
         'container_status': container.status
     }
 
-    redis.hmset(job_uiid, result)
+    redis.set(job_uiid, json.dumps(result))
     container.wait()
 
     muons_momentum_plus = np.load('{0}/output_mu/muons_momentum.npy'.format(host_dir))
@@ -81,17 +81,18 @@ def run_simulation(magnet_config, job_uiid):
         'muons_momentum': np.concatenate([muons_momentum_plus, muons_momentum_minus], axis=0).tolist(),
         'veto_points': np.concatenate([veto_points_plus, veto_points_minus], axis=0).tolist()
     }
-    redis.hmset(job_uiid, result)
+    redis.set(job_uiid, json.dumps(result))
     return result
 
 
 def get_result(job_uiid):
-    result = redis.hgetall(job_uiid)
+    result = redis.get(job_uiid)
     if result is None:
         return 'No key'
+    result = json.loads(result)
     if result['container_status'] == 'exited':
         return result
     else:
-        container = client.get(result['container_id'])
+        container = client.containers.get(result['container_id'])
         container.reload()
         return container.status
