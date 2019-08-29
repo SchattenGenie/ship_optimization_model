@@ -88,11 +88,12 @@ def run_simulation(magnet_config, job_uuid):
 def get_result(job_uuid):
     result = redis.get(job_uuid)
     if result is None:
-        return 'No key'
+        return {
+            'uuid': None,
+            'container_id': None,
+            'container_status': None,
+            'muons_momentum': None,
+            'veto_points': None
+        }
     result = json.loads(result)
-    if result['container_status'] == 'exited':
-        return result
-    else:
-        container = client.containers.get(result['container_id'])
-        container.reload()
-        return container.status
+    return result
