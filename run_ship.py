@@ -44,7 +44,7 @@ def run_simulation(magnet_config, job_uuid):
 
     # save magnet config for ship
     # in host directory
-    magnet_config_path = os.path.join(host_dir, 'magnet_config.json')
+    magnet_config_path = os.path.join(host_dir, 'magnet_params.json')
     with open(magnet_config_path, 'w', encoding='utf-8') as f:
         json.dump(magnet_config, f, ensure_ascii=False, indent=4)
 
