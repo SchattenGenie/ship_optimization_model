@@ -44,7 +44,7 @@ def run_simulation(magnet_config, job_uuid):
 
     # save magnet config for ship
     # in host directory
-    magnet_config_path = os.path.join(host_dir, 'magnet_params.json')
+    magnet_config_path = os.path.join(host_dir, "magnet_params.json")
     with open(magnet_config_path, 'w', encoding='utf-8') as f:
         json.dump(magnet_config, f, ensure_ascii=False, indent=4)
 
@@ -54,7 +54,6 @@ def run_simulation(magnet_config, job_uuid):
     # set container dir
     container_dir = '/root/host_directory'
 
-    # TODO: use python docker sdk
     num_repetitions = magnet_config.get('num_repetitions', 100)
     command = "alienv setenv -w /sw FairShip/latest -c /run_simulation.sh {}".format(num_repetitions)
     container = create_job(host_dir=host_outer_dir, container_dir=container_dir, command=command)
@@ -91,9 +90,14 @@ def get_result(job_uuid):
         return {
             'uuid': None,
             'container_id': None,
-            'container_status': None,
+            'container_status': 'failed',  # 'failed'
             'muons_momentum': None,
             'veto_points': None
         }
     result = json.loads(result)
+    if result['container_status'] != 'exited':
+        container = client.containers.get(result['container_id'])
+        container.reload()
+        if container.status == 'exited':
+            result['container_status'] = 'failed'
     return result

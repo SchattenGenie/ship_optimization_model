@@ -15,7 +15,7 @@ app = Flask(__name__)
 @app.route('/simulate', methods=['POST'])
 def simulate():
     magnet_config = json.loads(flask_request.data)
-    job_uuid = str(uuid.uuid4())
+    job_uuid: str = str(uuid.uuid4())
     Thread(target=run_ship.run_simulation, kwargs=dict(magnet_config=magnet_config, job_uuid=job_uuid)).start()
     return job_uuid
 
