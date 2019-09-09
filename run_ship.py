@@ -56,13 +56,18 @@ def run_simulation(magnet_config, job_uuid):
 
     num_repetitions = magnet_config.get('num_repetitions', 100)
     command = "alienv setenv -w /sw FairShip/latest -c /run_simulation.sh {}".format(num_repetitions)
+    result = {
+        'uuid': None,
+        'container_id': None,
+        'container_status': 'starting'
+    }
+    redis.set(job_uuid, json.dumps(result))
     container = create_job(host_dir=host_outer_dir, container_dir=container_dir, command=command)
     result = {
         'uuid': job_uuid,
         'container_id': container.id,
         'container_status': container.status
     }
-
     redis.set(job_uuid, json.dumps(result))
     container.wait()
 
