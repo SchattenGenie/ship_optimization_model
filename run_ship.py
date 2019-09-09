@@ -101,6 +101,8 @@ def get_result(job_uuid):
         }
     result = json.loads(result)
     if result['container_status'] != 'exited':
+        if result['container_id'] is None:
+            return result
         container = client.containers.get(result['container_id'])
         container.reload()
         if container.status == 'exited':
