@@ -13,7 +13,7 @@ import config
 import docker
 import uuid
 import docker
-from shutil import copy
+from shutil import copy, rmtree
 import numpy as np
 import config
 from redis import Redis
@@ -69,23 +69,35 @@ def run_simulation(magnet_config, job_uuid):
         'container_status': container.status
     }
     redis.set(job_uuid, json.dumps(result))
-    container.wait()
+    try:
+        container.wait()
 
-    muons_momentum_plus = np.load('{0}/output_mu/muons_momentum.npy'.format(host_dir))
-    muons_momentum_minus = np.load('{0}/output_antimu/muons_momentum.npy'.format(host_dir))
+        muons_momentum_plus = np.load('{0}/output_mu/muons_momentum.npy'.format(host_dir))
+        muons_momentum_minus = np.load('{0}/output_antimu/muons_momentum.npy'.format(host_dir))
 
-    veto_points_plus = np.load('{0}/output_mu/veto_points.npy'.format(host_dir))
-    veto_points_minus = np.load('{0}/output_antimu/veto_points.npy'.format(host_dir))
+        veto_points_plus = np.load('{0}/output_mu/veto_points.npy'.format(host_dir))
+        veto_points_minus = np.load('{0}/output_antimu/veto_points.npy'.format(host_dir))
 
-    container.reload()
-    result = {
-        'uuid': job_uuid,
-        'container_id': container.id,
-        'container_status': container.status,
-        'muons_momentum': np.concatenate([muons_momentum_plus, muons_momentum_minus], axis=0).tolist(),
-        'veto_points': np.concatenate([veto_points_plus, veto_points_minus], axis=0).tolist()
-    }
-    redis.set(job_uuid, json.dumps(result))
+        container.reload()
+        result = {
+            'uuid': job_uuid,
+            'container_id': container.id,
+            'container_status': container.status,
+            'muons_momentum': np.concatenate([muons_momentum_plus, muons_momentum_minus], axis=0).tolist(),
+            'veto_points': np.concatenate([veto_points_plus, veto_points_minus], axis=0).tolist()
+        }
+        redis.set(job_uuid, json.dumps(result))
+    except:
+        container.reload()
+        result = {
+            'uuid': job_uuid,
+            'container_id': container.id,
+            'container_status': "failed",
+            'muons_momentum': None,
+            'veto_points': None
+        }
+        redis.set(job_uuid, json.dumps(result))
+    shutil.rmtree(host_dirhost_dir)
     return result
 
 
@@ -95,16 +107,9 @@ def get_result(job_uuid):
         return {
             'uuid': None,
             'container_id': None,
-            'container_status': 'failed',  # 'failed'
+            'container_status': 'failed',
             'muons_momentum': None,
             'veto_points': None
         }
     result = json.loads(result)
-    if result['container_status'] != 'exited':
-        if result['container_id'] is None:
-            return result
-        container = client.containers.get(result['container_id'])
-        container.reload()
-        if container.status == 'exited':
-            result['container_status'] = 'failed'
     return result
