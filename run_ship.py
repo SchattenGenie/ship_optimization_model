@@ -97,7 +97,7 @@ def run_simulation(magnet_config, job_uuid):
             'veto_points': None
         }
         redis.set(job_uuid, json.dumps(result))
-    shutil.rmtree(host_dirhost_dir)
+    shutil.rmtree(host_dir)
     return result
 
 
