@@ -17,6 +17,7 @@ from shutil import copy, rmtree
 import numpy as np
 import config
 from redis import Redis
+import traceback
 
 
 redis = Redis()
@@ -59,14 +60,16 @@ def run_simulation(magnet_config, job_uuid):
     result = {
         'uuid': None,
         'container_id': None,
-        'container_status': 'starting'
+        'container_status': 'starting',
+        'message': None
     }
     redis.set(job_uuid, json.dumps(result))
     container = create_job(host_dir=host_outer_dir, container_dir=container_dir, command=command)
     result = {
         'uuid': job_uuid,
         'container_id': container.id,
-        'container_status': container.status
+        'container_status': container.status,
+        'message': None
     }
     redis.set(job_uuid, json.dumps(result))
     try:
@@ -84,17 +87,19 @@ def run_simulation(magnet_config, job_uuid):
             'container_id': container.id,
             'container_status': container.status,
             'muons_momentum': np.concatenate([muons_momentum_plus, muons_momentum_minus], axis=0).tolist(),
-            'veto_points': np.concatenate([veto_points_plus, veto_points_minus], axis=0).tolist()
+            'veto_points': np.concatenate([veto_points_plus, veto_points_minus], axis=0).tolist(),
+            'message': None
         }
         redis.set(job_uuid, json.dumps(result))
-    except:
+    except Exception as e:
         container.reload()
         result = {
             'uuid': job_uuid,
             'container_id': container.id,
             'container_status': "failed",
             'muons_momentum': None,
-            'veto_points': None
+            'veto_points': None,
+            'message': traceback.format_exc()
         }
         redis.set(job_uuid, json.dumps(result))
     shutil.rmtree(host_dir)
