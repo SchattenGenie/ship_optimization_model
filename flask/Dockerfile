@@ -9,9 +9,9 @@ RUN apt-get update && \
     apt-get update && apt-get install -y --no-install-recommends docker-ce docker-ce-cli containerd.io && \
     apt-get clean -y && rm -rf /var/lib/apt/lists/* && \
     pip3 install wheel && \
-    pip3 install uwsgi numpy scipy Flask requests docker schema redis
+    pip3 install uwsgi numpy scipy Flask requests docker schema redis pykube
 
-RUN cd /root && git clone https://github.com/SchattenGenie/ship_optimization_model.git
+RUN cd /root && git clone --branch k8s https://github.com/SchattenGenie/ship_optimization_model.git
 
 USER root
 EXPOSE 5432

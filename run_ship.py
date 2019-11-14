@@ -18,6 +18,8 @@ import config
 from redis import Redis
 import traceback
 import pykube
+import copy
+
 
 redis = Redis()
 config_k8s = pykube.KubeConfig.from_url(config.K8S_PROXY)
@@ -42,24 +44,20 @@ def run_simulation(magnet_config, job_uuid):
     # make random directory for ship docker
     # to store input files and output files
     input_dir = 'input_dir_{}'.format(job_uuid)
-    host_dir = '{}/{}'.format(config.CONTAINER_DIRECTORY, input_dir)
-    host_dir = os.path.abspath(host_dir)
+    flask_host_dir = '{}/{}'.format(config.FLASK_CONTAINER_DIRECTORY, input_dir)
+    flask_host_dir = os.path.abspath(flask_host_dir)
     host_outer_dir = '{}/{}'.format(config.HOST_DIRECTORY, input_dir)
-    os.mkdir(host_dir)
+    os.mkdir(flask_host_dir)
 
     # save magnet config for ship
     # in host directory
-    magnet_config_path = os.path.join(host_dir, "magnet_params.json")
+    magnet_config_path = os.path.join(flask_host_dir, "magnet_params.json")
     with open(magnet_config_path, 'w', encoding='utf-8') as f:
         json.dump(magnet_config, f, ensure_ascii=False, indent=4)
 
     # copy preprocessing file to destination
-    copy('./preprocess_root_file.py', host_dir)
+    copy('./preprocess_root_file.py', flask_host_dir)
 
-    # set container dir
-    container_dir = '/root/host_directory'
-
-    num_repetitions = magnet_config.get('num_repetitions', 100)
     result = {
         'uuid': None,
         'container_id': None,
@@ -67,6 +65,13 @@ def run_simulation(magnet_config, job_uuid):
         'message': None
     }
     redis.set(job_uuid, json.dumps(result))
+
+    JOB_SPEC = copy.deepcopy(config.JOB_SPEC)
+
+    # JOB_SPEC["spec"]["containers"][0]["volumeMounts"][0]["mountPath"] = SHIP_CONTAINER_DIRECTORY
+    JOB_SPEC["spec"]["volumes"][0]["hostPath"] = host_outer_dir
+    JOB_SPEC["metadata"]["name"] = "ship-job-{}".format(job_uuid)
+
     job = pykube.Job(api, JOB_SPEC)
     job.create()
 

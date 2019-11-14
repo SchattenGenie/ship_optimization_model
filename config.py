@@ -5,9 +5,9 @@
 HOST = '0.0.0.0'
 PORT = '5432'
 K8S_PROXY = 'http://127.0.0.1:8002'
-HOST_DIRECTORY = '/mnt/belavin/temp'
-CONTAINER_DIRECTORY = '/root/temp'
-
+HOST_DIRECTORY = '/mnt/shipfs/temp'
+FLASK_CONTAINER_DIRECTORY = '/root/temp'
+SHIP_CONTAINER_DIRECTORY = '/root/host_directory'
 
 JOB_SPEC = {
   "apiVersion": "batch/v1",
@@ -34,7 +34,7 @@ JOB_SPEC = {
             ],
             "volumeMounts": [
               {
-                "mountPath": "/root/host_directory",
+                "mountPath": SHIP_CONTAINER_DIRECTORY,
                 "name": "data"
               }
             ]
@@ -45,7 +45,7 @@ JOB_SPEC = {
           {
             "name": "data",
             "hostPath": {
-              "path": "/mnt/shipfs/{}",
+              "path": "{}/{}",
               "type": "Directory"
             }
           }
