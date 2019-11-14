@@ -10,7 +10,6 @@ from collections import defaultdict
 import time
 import requests
 import config
-import docker
 import uuid
 import docker
 from shutil import copy, rmtree
@@ -18,20 +17,25 @@ import numpy as np
 import config
 from redis import Redis
 import traceback
-
+import pykube
 
 redis = Redis()
-client = docker.from_env()
+config_k8s = pykube.KubeConfig.from_url(config.K8S_PROXY)
+api = pykube.HTTPClient(config_k8s)
+api.timeout = 1e6
 
 
-def create_job(host_dir, container_dir, command):
-    container = client.containers.run(
-        image='vbelavin/ship_simple_model',
-        detach=True,
-        command=command,
-        volumes={host_dir: {'bind': container_dir, 'mode': 'rw'}}
-    )
-    return container
+def status_checker(job):
+    active = job['status'].get('active', 0)
+    succeeded = job['status'].get('succeeded', 0)
+    failed = job['status'].get('failed', 0)
+    if succeeded:
+        return 'succeeded'
+    elif active:
+        return 'wait'
+    elif failed:
+        return 'failed'
+    return 'wait'
 
 
 def run_simulation(magnet_config, job_uuid):
@@ -56,7 +60,6 @@ def run_simulation(magnet_config, job_uuid):
     container_dir = '/root/host_directory'
 
     num_repetitions = magnet_config.get('num_repetitions', 100)
-    command = "alienv setenv -w /sw FairShip/latest -c /run_simulation.sh {}".format(num_repetitions)
     result = {
         'uuid': None,
         'container_id': None,
@@ -64,16 +67,27 @@ def run_simulation(magnet_config, job_uuid):
         'message': None
     }
     redis.set(job_uuid, json.dumps(result))
-    container = create_job(host_dir=host_outer_dir, container_dir=container_dir, command=command)
+    job = pykube.Job(api, JOB_SPEC)
+    job.create()
+
     result = {
         'uuid': job_uuid,
-        'container_id': container.id,
-        'container_status': container.status,
+        'container_id': job.obj['metadata']['name'],
+        'container_status': job.obj['status'],
         'message': None
     }
     redis.set(job_uuid, json.dumps(result))
+    time.sleep(1.)
+    job.reload()
+
+    status = 'wait'
     try:
-        container.wait()
+        while status == 'wait':
+            time.sleep(10)
+            job.reload()
+            status = status_checker(job=job)
+        if status == 'failed':
+            raise(ValueError("JOB FAILED!!!!"))
 
         muons_momentum_plus = np.load('{0}/output_mu/muons_momentum.npy'.format(host_dir))
         muons_momentum_minus = np.load('{0}/output_antimu/muons_momentum.npy'.format(host_dir))
@@ -84,19 +98,21 @@ def run_simulation(magnet_config, job_uuid):
         container.reload()
         result = {
             'uuid': job_uuid,
-            'container_id': container.id,
-            'container_status': container.status,
+            'container_id': job.obj['metadata']['name'],
+            'container_status': job.obj['status'],
             'muons_momentum': np.concatenate([muons_momentum_plus, muons_momentum_minus], axis=0).tolist(),
             'veto_points': np.concatenate([veto_points_plus, veto_points_minus], axis=0).tolist(),
             'message': None
         }
         redis.set(job_uuid, json.dumps(result))
+
     except Exception as e:
+        print(e, traceback.print_exc())
         container.reload()
         result = {
             'uuid': job_uuid,
-            'container_id': container.id,
-            'container_status': "failed",
+            'container_id': job.obj['metadata']['name'],
+            'container_status': job.obj['status'],
             'muons_momentum': None,
             'veto_points': None,
             'message': traceback.format_exc()
