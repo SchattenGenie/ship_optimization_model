@@ -3,7 +3,7 @@
 
 # parameters of server
 HOST = '0.0.0.0'
-PORT = '5432'
+PORT = '5433'
 K8S_PROXY = 'http://127.0.0.1:8002'
 HOST_DIRECTORY = '/mnt/shipfs/temp'
 FLASK_CONTAINER_DIRECTORY = '/root/temp'

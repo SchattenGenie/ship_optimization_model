@@ -93,11 +93,11 @@ def run_simulation(magnet_config, job_uuid):
         if status == 'failed':
             raise(ValueError("JOB FAILED!!!!"))
 
-        muons_momentum_plus = np.load('{0}/output_mu/muons_momentum.npy'.format(host_dir))
-        muons_momentum_minus = np.load('{0}/output_antimu/muons_momentum.npy'.format(host_dir))
+        muons_momentum_plus = np.load('{0}/output_mu/muons_momentum.npy'.format(flask_host_dir))
+        muons_momentum_minus = np.load('{0}/output_antimu/muons_momentum.npy'.format(flask_host_dir))
 
-        veto_points_plus = np.load('{0}/output_mu/veto_points.npy'.format(host_dir))
-        veto_points_minus = np.load('{0}/output_antimu/veto_points.npy'.format(host_dir))
+        veto_points_plus = np.load('{0}/output_mu/veto_points.npy'.format(flask_host_dir))
+        veto_points_minus = np.load('{0}/output_antimu/veto_points.npy'.format(flask_host_dir))
 
         result = {
             'uuid': job_uuid,
@@ -120,7 +120,7 @@ def run_simulation(magnet_config, job_uuid):
             'message': traceback.format_exc()
         }
         redis.set(job_uuid, json.dumps(result))
-    shutil.rmtree(host_dir)
+    shutil.rmtree(flask_host_dir)
     return result
 
 
