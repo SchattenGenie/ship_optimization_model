@@ -11,14 +11,13 @@ import time
 import requests
 import config
 import uuid
-import docker
 from shutil import copy, rmtree
 import numpy as np
 import config
 from redis import Redis
 import traceback
 import pykube
-import copy
+from copy import deepcopy
 
 
 redis = Redis()
@@ -28,9 +27,9 @@ api.timeout = 1e6
 
 
 def status_checker(job):
-    active = job['status'].get('active', 0)
-    succeeded = job['status'].get('succeeded', 0)
-    failed = job['status'].get('failed', 0)
+    active = job.obj['status'].get('active', 0)
+    succeeded = job.obj['status'].get('succeeded', 0)
+    failed = job.obj['status'].get('failed', 0)
     if succeeded:
         return 'succeeded'
     elif active:
@@ -47,7 +46,7 @@ def run_simulation(magnet_config, job_uuid):
     flask_host_dir = '{}/{}'.format(config.FLASK_CONTAINER_DIRECTORY, input_dir)
     flask_host_dir = os.path.abspath(flask_host_dir)
     host_outer_dir = '{}/{}'.format(config.HOST_DIRECTORY, input_dir)
-    os.mkdir(flask_host_dir)
+    print(os.mkdir(flask_host_dir))
 
     # save magnet config for ship
     # in host directory
@@ -66,13 +65,13 @@ def run_simulation(magnet_config, job_uuid):
     }
     redis.set(job_uuid, json.dumps(result))
 
-    JOB_SPEC = copy.deepcopy(config.JOB_SPEC)
+    JOB_SPEC = deepcopy(config.JOB_SPEC)
 
     # JOB_SPEC["spec"]["containers"][0]["volumeMounts"][0]["mountPath"] = SHIP_CONTAINER_DIRECTORY
-    JOB_SPEC["spec"]["volumes"][0]["hostPath"] = host_outer_dir
+    JOB_SPEC["spec"]["template"]["spec"]["volumes"][0]["hostPath"]["path"] = host_outer_dir
     JOB_SPEC["metadata"]["name"] = "ship-job-{}".format(job_uuid)
 
-    job = pykube.Job(api, JOB_SPEC)
+    job = pykube.Job(api, json.dumps(JOB_SPEC))
     job.create()
 
     result = {
@@ -100,7 +99,6 @@ def run_simulation(magnet_config, job_uuid):
         veto_points_plus = np.load('{0}/output_mu/veto_points.npy'.format(host_dir))
         veto_points_minus = np.load('{0}/output_antimu/veto_points.npy'.format(host_dir))
 
-        container.reload()
         result = {
             'uuid': job_uuid,
             'container_id': job.obj['metadata']['name'],
@@ -113,7 +111,6 @@ def run_simulation(magnet_config, job_uuid):
 
     except Exception as e:
         print(e, traceback.print_exc())
-        container.reload()
         result = {
             'uuid': job_uuid,
             'container_id': job.obj['metadata']['name'],
