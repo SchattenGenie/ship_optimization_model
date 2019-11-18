@@ -13,7 +13,7 @@ import config
 import uuid
 from shutil import copy, rmtree
 import numpy as np
-from control import config
+import config
 from redis import Redis
 import traceback
 import pykube

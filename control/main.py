@@ -25,7 +25,7 @@ def simulate():
         magnet_config=magnet_config,
         job_uuid=job_uuid,
         n_events=n_events_per_job,
-        first_event=first_event)
+        first_event=0)
            ).start()
     return job_uuid
 
