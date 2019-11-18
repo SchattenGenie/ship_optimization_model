@@ -19,15 +19,11 @@ def simulate():
     Thread(target=run_ship.run_simulation, kwargs=dict(magnet_config=magnet_config, job_uuid=job_uuid)).start()
     return job_uuid
 
-# TODO: lazy evaluation
+
 @app.route('/retrieve_result', methods=['POST'])
 def retrieve_result():
     data = json.loads(flask_request.data)
     result = run_ship.get_result(data['uuid'])
-    # if result is None
-    # that there are two possible situations
-    # calculation is not finished yet
-    # or no key!
     return result
 
 

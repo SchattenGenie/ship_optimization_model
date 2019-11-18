@@ -26,6 +26,20 @@ api = pykube.HTTPClient(config_k8s)
 api.timeout = 1e6
 
 
+def extract_file_from_container(container, path, local_filename, remote_full_path):
+    f = open(os.path.join(path, local_filename + '.tar'), 'wb')
+    bits, stat = container.get_archive(remote_full_path)
+    for chunk in bits:
+        f.write(chunk)
+    f.close()
+    tar = tarfile.open(os.path.join(path, local_filename + '.tar'))
+    for member in tar.getmembers():
+        f = tar.extractfile(member)
+        content = f.read()
+    return content.decode()
+
+
+
 def status_checker(job):
     active = job.obj['status'].get('active', 0)
     succeeded = job.obj['status'].get('succeeded', 0)
@@ -93,18 +107,19 @@ def run_simulation(magnet_config, job_uuid):
         if status == 'failed':
             raise(ValueError("JOB FAILED!!!!"))
 
-        muons_momentum_plus = np.load('{0}/output_mu/muons_momentum.npy'.format(flask_host_dir))
-        muons_momentum_minus = np.load('{0}/output_antimu/muons_momentum.npy'.format(flask_host_dir))
-
-        veto_points_plus = np.load('{0}/output_mu/veto_points.npy'.format(flask_host_dir))
-        veto_points_minus = np.load('{0}/output_antimu/veto_points.npy'.format(flask_host_dir))
+        optimise_input = json.loads(extract_file_from_container(container, host_dir,
+                                                                "optimise_input",
+                                                                "/ship/shield_files/outputs/optimise_input.json"))
 
         result = {
             'uuid': job_uuid,
             'container_id': job.obj['metadata']['name'],
             'container_status': job.obj['status'],
-            'muons_momentum': np.concatenate([muons_momentum_plus, muons_momentum_minus], axis=0).tolist(),
-            'veto_points': np.concatenate([veto_points_plus, veto_points_minus], axis=0).tolist(),
+            'kinematics': optimise_input["kinematics"],
+            "params": optimise_input["params"],
+            "veto_points": optimise_input["veto_points"],
+            "l": optimise_input["l"],
+            "w": optimise_input["w"],
             'message': None
         }
         redis.set(job_uuid, json.dumps(result))

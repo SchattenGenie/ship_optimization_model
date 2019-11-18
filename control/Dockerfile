@@ -15,5 +15,3 @@ RUN cd /root && git clone --branch k8s https://github.com/SchattenGenie/ship_opt
 USER root
 EXPOSE 5432
 WORKDIR /root/ship_optimization_model
-
-CMD [ "uwsgi", "--ini", "app.ini" ]
