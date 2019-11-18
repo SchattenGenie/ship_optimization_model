@@ -69,6 +69,9 @@ def run_simulation(magnet_config, job_uuid):
     # JOB_SPEC["spec"]["containers"][0]["volumeMounts"][0]["mountPath"] = SHIP_CONTAINER_DIRECTORY
     JOB_SPEC["spec"]["template"]["spec"]["volumes"][0]["hostPath"]["path"] = host_outer_dir
     JOB_SPEC["metadata"]["name"] = "ship-job-{}".format(job_uuid)
+    JOB_SPEC["spec"]["template"]["spec"]["containers"][0]["command"].append(",".join(map(str, magnet_config)))
+    JOB_SPEC["spec"]["template"]["spec"]["containers"][0]["command"].append(n_events)
+    JOB_SPEC["spec"]["template"]["spec"]["containers"][0]["command"].append(0)
 
     job = pykube.Job(api, json.dumps(JOB_SPEC))
     job.create()

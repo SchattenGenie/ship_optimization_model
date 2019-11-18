@@ -14,5 +14,3 @@ WORKDIR /ship
 RUN mkdir ./shield_files
 RUN mkdir ./shield_files/geometry/
 RUN mkdir ./shield_files/outputs/
-
-# ENTRYPOINT ["alienv", "setenv", "-w", "/sw FairShip/latest", "-c", "/run_simulation.sh"]

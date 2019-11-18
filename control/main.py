@@ -14,9 +14,19 @@ app = Flask(__name__)
 
 @app.route('/simulate', methods=['POST'])
 def simulate():
-    magnet_config = json.loads(flask_request.data)
+    parameters = json.loads(flask_request.data)
+    magnet_config = parameters["shape"]
+    requested_num_events = parameters["n_events"]
+    requested_num_events = min(requested_num_events, config.EVENTS_TOTAL)
     job_uuid: str = str(uuid.uuid4())
-    Thread(target=run_ship.run_simulation, kwargs=dict(magnet_config=magnet_config, job_uuid=job_uuid)).start()
+    n_events_per_job = requested_num_events #  // config.N_JOBS
+
+    Thread(target=run_ship.run_simulation, kwargs=dict(
+        magnet_config=magnet_config,
+        job_uuid=job_uuid,
+        n_events=n_events_per_job,
+        first_event=first_event)
+           ).start()
     return job_uuid
 
 

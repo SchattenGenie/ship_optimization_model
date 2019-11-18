@@ -11,6 +11,9 @@ FLASK_CONTAINER_DIRECTORY = '/root/temp'
 SHIP_CONTAINER_DIRECTORY = '/root/host_directory'
 SHIP_MUON_DIRECTORY = '/ship/muon_input'
 
+EVENTS_TOTAL = 485879
+N_JOBS = 1
+
 JOB_SPEC = {
   "apiVersion": "batch/v1",
   "kind": "Job",
@@ -32,10 +35,6 @@ JOB_SPEC = {
               "FairShip/latest",
               "-c",
               "/ship/run_simulation.sh",
-              "{}",
-              "{}",
-              "{}",
-              "{}",
             ],
             "volumeMounts": [
               {
