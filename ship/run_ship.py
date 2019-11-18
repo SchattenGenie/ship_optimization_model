@@ -27,7 +27,7 @@ class SHIPRunner(object):
         self.shield_geo_file = os.path.join(self.geometry_dir, shield_geofile)
         self.output_dir = "shield_files/outputs/"
         self.output_file = os.path.join(self.output_dir, "ship.conical.MuonBack-TGeant4.root")
-        self.input_file = "muon_input/reweighted_input_test.root"
+        self.input_file = "muon_input/pythia8_Geant4_10.0_withCharmandBeauty0_mu.roots"
 
     def run_ship(self, phiRandom=False, followMuon=True, n_events=10, first_event=0):
         """
