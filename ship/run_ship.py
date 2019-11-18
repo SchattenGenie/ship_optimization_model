@@ -85,6 +85,7 @@ class SHIPRunner(object):
         saveBasicParameters.execute(geofile_output_path, ship_geo)
         return run
 
+
 if __name__ == '__main__':
     ship_runner = SHIPRunner()
     ship_runner.run_ship(n_events=1000)

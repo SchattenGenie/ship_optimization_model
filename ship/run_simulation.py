@@ -11,6 +11,7 @@ parser.add_argument("--shield_params", type=str)
 parser.add_argument("--n_events", type=int, default=1000)
 parser.add_argument("--first_event", type=int, default=0)
 
+
 def main(shield_params, n_events, first_event):
     """
     Gets vector of optimised shield parameters(not full one), run SHiP simulation
@@ -43,7 +44,6 @@ def main(shield_params, n_events, first_event):
 
     with open(os.path.join(ship_runner.output_dir, "optimise_input.json"), "w") as f:
         json.dump(returned_params, f)
-
 
 
 if __name__ == '__main__':

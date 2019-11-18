@@ -26,20 +26,6 @@ api = pykube.HTTPClient(config_k8s)
 api.timeout = 1e6
 
 
-def extract_file_from_container(container, path, local_filename, remote_full_path):
-    f = open(os.path.join(path, local_filename + '.tar'), 'wb')
-    bits, stat = container.get_archive(remote_full_path)
-    for chunk in bits:
-        f.write(chunk)
-    f.close()
-    tar = tarfile.open(os.path.join(path, local_filename + '.tar'))
-    for member in tar.getmembers():
-        f = tar.extractfile(member)
-        content = f.read()
-    return content.decode()
-
-
-
 def status_checker(job):
     active = job.obj['status'].get('active', 0)
     succeeded = job.obj['status'].get('succeeded', 0)
@@ -60,16 +46,13 @@ def run_simulation(magnet_config, job_uuid):
     flask_host_dir = '{}/{}'.format(config.FLASK_CONTAINER_DIRECTORY, input_dir)
     flask_host_dir = os.path.abspath(flask_host_dir)
     host_outer_dir = '{}/{}'.format(config.HOST_DIRECTORY, input_dir)
-    print(os.mkdir(flask_host_dir))
+    os.mkdir(flask_host_dir)
 
     # save magnet config for ship
     # in host directory
     magnet_config_path = os.path.join(flask_host_dir, "magnet_params.json")
     with open(magnet_config_path, 'w', encoding='utf-8') as f:
         json.dump(magnet_config, f, ensure_ascii=False, indent=4)
-
-    # copy preprocessing file to destination
-    copy('./preprocess_root_file.py', flask_host_dir)
 
     result = {
         'uuid': None,
@@ -80,7 +63,9 @@ def run_simulation(magnet_config, job_uuid):
     redis.set(job_uuid, json.dumps(result))
 
     JOB_SPEC = deepcopy(config.JOB_SPEC)
-
+    job_spec_config_file = os.path.join(flask_host_dir, "job_spec.json")
+    with open(magnet_config_path, 'w', encoding='utf-8') as f:
+        json.dump(JOB_SPEC, f, ensure_ascii=False, indent=4)
     # JOB_SPEC["spec"]["containers"][0]["volumeMounts"][0]["mountPath"] = SHIP_CONTAINER_DIRECTORY
     JOB_SPEC["spec"]["template"]["spec"]["volumes"][0]["hostPath"]["path"] = host_outer_dir
     JOB_SPEC["metadata"]["name"] = "ship-job-{}".format(job_uuid)
@@ -107,9 +92,7 @@ def run_simulation(magnet_config, job_uuid):
         if status == 'failed':
             raise(ValueError("JOB FAILED!!!!"))
 
-        optimise_input = json.loads(extract_file_from_container(container, host_dir,
-                                                                "optimise_input",
-                                                                "/ship/shield_files/outputs/optimise_input.json"))
+        optimise_input = json.loads('{}/{}'.format(flask_host_dir, 'optimise_input.json'))
 
         result = {
             'uuid': job_uuid,

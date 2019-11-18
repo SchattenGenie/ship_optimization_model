@@ -7,6 +7,7 @@ import sys
 import ROOT
 import os
 
+
 def check_acceptance(hit, bound=(330, 530)):
     """
     :param hit:
@@ -16,9 +17,8 @@ def check_acceptance(hit, bound=(330, 530)):
     return abs(hit.GetX()) <= bound[0] and abs(hit.GetY()) <= bound[1]
 
 
-def process_file(filename, tracker_ends=None, muons_output_name = "muons_output", epsilon=1e-9, debug=True,
+def process_file(filename, tracker_ends=None, epsilon=1e-9, debug=True,
                  apply_acceptance_cut=False):
-    directory = os.path.dirname(os.path.abspath(filename))
     file = ROOT.TFile(filename)
 
     tree = file.Get("cbmsim")

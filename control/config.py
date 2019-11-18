@@ -6,8 +6,10 @@ HOST = '0.0.0.0'
 PORT = '5433'
 K8S_PROXY = 'http://127.0.0.1:8002'
 HOST_DIRECTORY = '/mnt/shipfs/temp'
+HOST_MUON_DIRECTORY = '/mnt/shipfs/muon_input'
 FLASK_CONTAINER_DIRECTORY = '/root/temp'
 SHIP_CONTAINER_DIRECTORY = '/root/host_directory'
+SHIP_MUON_DIRECTORY = '/ship/muon_input'
 
 JOB_SPEC = {
   "apiVersion": "batch/v1",
@@ -21,7 +23,7 @@ JOB_SPEC = {
         "containers": [
           {
             "name": "ship",
-            "image": "vbelavin/ship_simple_model",
+            "image": "vbelavin/ship_full",
             "command": [
               "alienv",
               "setenv",
@@ -29,13 +31,20 @@ JOB_SPEC = {
               "/sw",
               "FairShip/latest",
               "-c",
-              "/run_simulation.sh",
-              "{}"
+              "/ship/run_simulation.sh",
+              "{}",
+              "{}",
+              "{}",
+              "{}",
             ],
             "volumeMounts": [
               {
                 "mountPath": SHIP_CONTAINER_DIRECTORY,
                 "name": "data"
+              },
+              {
+                "mountPath": SHIP_MUON_DIRECTORY,
+                "name": "muon"
               }
             ]
           }
@@ -44,6 +53,13 @@ JOB_SPEC = {
         "volumes": [
           {
             "name": "data",
+            "hostPath": {
+              "path": "{}/{}",
+              "type": "Directory"
+            }
+          },
+          {
+            "name": "muon",
             "hostPath": {
               "path": "{}/{}",
               "type": "Directory"
