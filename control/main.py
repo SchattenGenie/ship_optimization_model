@@ -5,7 +5,7 @@ from flask import Flask, jsonify
 from flask import request as flask_request
 from threading import Thread
 import config
-import run_ship
+from control import run_job
 import json
 import uuid
 
@@ -21,7 +21,7 @@ def simulate():
     job_uuid: str = str(uuid.uuid4())
     n_events_per_job = requested_num_events #  // config.N_JOBS
 
-    Thread(target=run_ship.run_simulation, kwargs=dict(
+    Thread(target=run_job.run_simulation, kwargs=dict(
         magnet_config=magnet_config,
         job_uuid=job_uuid,
         n_events=n_events_per_job,

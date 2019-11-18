@@ -10,8 +10,7 @@ RUN apt-get update && \
     pip3 install wheel && \
     pip3 install uwsgi numpy scipy Flask requests schema redis pykube
 
-RUN cd /root && git clone --branch k8s https://github.com/SchattenGenie/ship_optimization_model.git
 
 USER root
 EXPOSE 5432
-WORKDIR /root/ship_optimization_model
+WORKDIR /ship_shield_optimisation
