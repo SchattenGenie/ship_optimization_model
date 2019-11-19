@@ -19,11 +19,10 @@ import traceback
 import pykube
 from copy import deepcopy
 
-
-redis = Redis()
 config_k8s = pykube.KubeConfig.from_url(config.K8S_PROXY)
 api = pykube.HTTPClient(config_k8s)
 api.timeout = 1e6
+redis = Redis()
 
 
 def status_checker(job):
@@ -53,7 +52,6 @@ def run_simulation(magnet_config, job_uuid, n_events, first_event):
     magnet_config_path = os.path.join(flask_host_dir, "magnet_params.json")
     with open(magnet_config_path, 'w', encoding='utf-8') as f:
         json.dump(magnet_config, f, ensure_ascii=False, indent=4)
-
     result = {
         'uuid': None,
         'container_id': None,
@@ -65,14 +63,16 @@ def run_simulation(magnet_config, job_uuid, n_events, first_event):
     JOB_SPEC = deepcopy(config.JOB_SPEC)
     job_spec_config_file = os.path.join(flask_host_dir, "job_spec.json")
     # JOB_SPEC["spec"]["containers"][0]["volumeMounts"][0]["mountPath"] = SHIP_CONTAINER_DIRECTORY
+    print(host_outer_dir)
     JOB_SPEC["spec"]["template"]["spec"]["volumes"][0]["hostPath"]["path"] = host_outer_dir
     JOB_SPEC["metadata"]["name"] = "ship-job-{}".format(job_uuid)
     JOB_SPEC["spec"]["template"]["spec"]["containers"][0]["command"].append(",".join(map(str, magnet_config)))
-    JOB_SPEC["spec"]["template"]["spec"]["containers"][0]["command"].append(n_events)
-    JOB_SPEC["spec"]["template"]["spec"]["containers"][0]["command"].append(0)
-    with open(magnet_config_path, 'w', encoding='utf-8') as f:
+    JOB_SPEC["spec"]["template"]["spec"]["containers"][0]["command"].append(str(n_events))
+    JOB_SPEC["spec"]["template"]["spec"]["containers"][0]["command"].append(str(0))
+    print(JOB_SPEC)
+    with open(job_spec_config_file, 'w', encoding='utf-8') as f:
         json.dump(JOB_SPEC, f, ensure_ascii=False, indent=4)
-    job = pykube.Job(api, json.dumps(JOB_SPEC))
+    job = pykube.Job(api, JOB_SPEC)
     job.create()
 
     result = {
@@ -84,7 +84,7 @@ def run_simulation(magnet_config, job_uuid, n_events, first_event):
     redis.set(job_uuid, json.dumps(result))
     time.sleep(1.)
     job.reload()
-
+    print(os.listdir(flask_host_dir))
     status = 'wait'
     try:
         while status == 'wait':
@@ -94,7 +94,11 @@ def run_simulation(magnet_config, job_uuid, n_events, first_event):
         if status == 'failed':
             raise(ValueError("JOB FAILED!!!!"))
 
-        optimise_input = json.loads('{}/{}'.format(flask_host_dir, 'optimise_input.json'))
+        print(job.obj)
+        time.sleep(60)
+        print(os.listdir(flask_host_dir))
+        with open('{}/{}'.format(flask_host_dir, 'optimise_input.json'), 'r') as j:
+            optimise_input = json.loads(j.read())
 
         result = {
             'uuid': job_uuid,
@@ -120,7 +124,8 @@ def run_simulation(magnet_config, job_uuid, n_events, first_event):
             'message': traceback.format_exc()
         }
         redis.set(job_uuid, json.dumps(result))
-    shutil.rmtree(flask_host_dir)
+    # shutil.rmtree(flask_host_dir)
+    print(os.listdir(flask_host_dir))
     return result
 
 

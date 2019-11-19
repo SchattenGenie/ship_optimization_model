@@ -5,7 +5,7 @@ from flask import Flask, jsonify
 from flask import request as flask_request
 from threading import Thread
 import config
-from control import run_job
+import run_job
 import json
 import uuid
 

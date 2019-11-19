@@ -6,7 +6,7 @@ HOST = '0.0.0.0'
 PORT = '5433'
 K8S_PROXY = 'http://127.0.0.1:8002'
 HOST_DIRECTORY = '/mnt/shipfs/temp'
-HOST_MUON_DIRECTORY = '/mnt/shipfs/muon_input'
+HOST_MUON_DIRECTORY = '/mnt/shipfs'
 FLASK_CONTAINER_DIRECTORY = '/root/temp'
 SHIP_CONTAINER_DIRECTORY = '/root/host_directory'
 SHIP_MUON_DIRECTORY = '/ship/muon_input'
@@ -60,7 +60,7 @@ JOB_SPEC = {
           {
             "name": "muon",
             "hostPath": {
-              "path": "{}/{}",
+              "path": HOST_MUON_DIRECTORY,
               "type": "Directory"
             }
           }
