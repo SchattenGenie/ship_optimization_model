@@ -33,7 +33,7 @@ def simulate():
 @app.route('/retrieve_result', methods=['POST'])
 def retrieve_result():
     data = json.loads(flask_request.data)
-    result = run_ship.get_result(data['uuid'])
+    result = run_job.get_result(data['uuid'])
     return result
 
 

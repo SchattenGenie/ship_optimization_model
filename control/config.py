@@ -21,6 +21,7 @@ JOB_SPEC = {
     "name": "ship-job-{}"
   },
   "spec": {
+    "ttlSecondsAfterFinished": 600,
     "template": {
       "spec": {
         "containers": [
@@ -36,6 +37,14 @@ JOB_SPEC = {
               "-c",
               "/ship/run_simulation.sh",
             ],
+            "resources": {
+              "requests": {
+                "memory": "5Gi",
+              },
+              "limits": {
+                "memory": "5Gi",
+              }
+            },
             "volumeMounts": [
               {
                 "mountPath": SHIP_CONTAINER_DIRECTORY,
