@@ -10,9 +10,8 @@ HOST_MUON_DIRECTORY = '/mnt/shipfs'
 FLASK_CONTAINER_DIRECTORY = '/root/temp'
 SHIP_CONTAINER_DIRECTORY = '/root/host_directory'
 SHIP_MUON_DIRECTORY = '/ship/muon_input'
-
+DATA_FILE = "reweighted_input_test.root"
 EVENTS_TOTAL = 485879
-N_JOBS = 1
 
 JOB_SPEC = {
   "apiVersion": "batch/v1",
@@ -21,7 +20,7 @@ JOB_SPEC = {
     "name": "ship-job-{}"
   },
   "spec": {
-    "ttlSecondsAfterFinished": 600,
+    "ttlSecondsAfterFinished": 14400,
     "template": {
       "spec": {
         "containers": [
