@@ -16,16 +16,14 @@ app = Flask(__name__)
 def simulate():
     parameters = json.loads(flask_request.data)
     magnet_config = parameters["shape"]
-    requested_num_events = parameters["n_events"]
-    requested_num_events = min(requested_num_events, config.EVENTS_TOTAL)
+    n_jobs = parameters.get("n_jobs", 6)
     job_uuid: str = str(uuid.uuid4())
-    n_events_per_job = requested_num_events #  // config.N_JOBS
 
     Thread(target=run_job.run_simulation, kwargs=dict(
         magnet_config=magnet_config,
         job_uuid=job_uuid,
-        n_events=n_events_per_job,
-        first_event=0)
+        n_jobs=n_jobs
+    )
            ).start()
     return job_uuid
 
