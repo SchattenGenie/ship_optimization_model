@@ -15,7 +15,7 @@ import saveBasicParameters
 
 
 class SHIPRunner(object):
-    def __init__(self, shield_geofile, same_seed=1):
+    def __init__(self, shield_geofile, same_seed=1, file_name="muon_input/pythia8_Geant4_10.0_withCharmandBeauty0_mu.root"):
         self.firstEvent = 0
         self.dy = 10.
         self.vessel_design = 5
@@ -23,13 +23,13 @@ class SHIPRunner(object):
         self.mcEngine = 'TGeant4'
         self.same_seed = same_seed
         self.theSeed = 1
-        self.geometry_dir = "shield_files/geometry/"
+        self.geometry_dir = "./shield_files/geometry/"
         self.shield_geo_file = os.path.join(self.geometry_dir, shield_geofile)
-        self.output_dir = "shield_files/outputs/"
+        self.output_dir = "./shield_files/outputs/"
         self.output_file = os.path.join(self.output_dir, "ship.conical.MuonBack-TGeant4.root")
-        self.input_file = "muon_input/pythia8_Geant4_10.0_withCharmandBeauty0_mu.root"
+        self.input_file = os.path.join("./muon_input", file_name)
 
-    def run_ship(self, phiRandom=False, followMuon=True, n_events=10, first_event=0):
+    def run_ship(self, phiRandom=False, followMuon=True, n_events=-1, first_event=0):
         """
         phiRandom = False  # only relevant for muon background generator
         followMuon = True  # only transport muons for a fast muon only background

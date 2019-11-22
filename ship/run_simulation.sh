@@ -1,5 +1,5 @@
 ls -lthaR /root/host_directory/
-python run_simulation.py --shield_params $1 --n_events $2 --first_event $3
+python run_simulation.py --shield_params $1 --n_events $2 --first_event $3 --file_name $4
 ls -lthaR /ship/shield_files/
 ls -lthaR /ship/shield_files/outputs/
 ls -lthaR /root/host_directory/
