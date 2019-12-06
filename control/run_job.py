@@ -9,15 +9,14 @@ import hashlib
 from collections import defaultdict
 import time
 import requests
-import config
 import uuid
 from shutil import copy, rmtree
 import numpy as np
-import config
 from redis import Redis
 import traceback
 import pykube
 from copy import deepcopy
+from control import config
 
 config_k8s = pykube.KubeConfig.from_url(config.K8S_PROXY)
 api = pykube.HTTPClient(config_k8s)
@@ -38,7 +37,7 @@ def status_checker(job):
     return 'wait'
 
 
-def run_simulation(magnet_config, job_uuid, n_jobs):
+def run_simulation(magnet_config, job_uuid, n_jobs, n_events):
     # make random directory for ship docker
     # to store input files and output files
     input_dir = 'input_dir_{}'.format(job_uuid)
@@ -64,9 +63,12 @@ def run_simulation(magnet_config, job_uuid, n_jobs):
     jobs = []
     uuids = []
 
-    chunk_size = 1 + config.EVENTS_TOTAL // n_jobs
-    start_event_num = 0
+    N_EVENTS = config.EVENTS_TOTAL if n_events is None else min(n_events, config.EVENTS_TOTAL)
+    chunk_size = N_EVENTS // n_jobs
     for part_number in range(n_jobs):
+        start_event_num = chunk_size * part_number
+        if part_number + 1 == n_jobs:
+            chunk_size += N_EVENTS % n_jobs
         JOB_SPEC = deepcopy(config.JOB_SPEC)
         flask_host_dir_part = '{}/part_{}'.format(flask_host_dir, part_number)
         host_outer_dir_part = '{}/part_{}'.format(host_outer_dir, part_number)
@@ -89,7 +91,6 @@ def run_simulation(magnet_config, job_uuid, n_jobs):
         job.create()
         jobs.append(job)
         uuids.append(per_job_uuid)
-        start_event_num += chunk_size
 
     result = {
         'uuid': uuids,

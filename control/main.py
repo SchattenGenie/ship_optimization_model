@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import config
 from flask import Flask, jsonify
 from flask import request as flask_request
 from threading import Thread
-import config
-import run_job
+from control import run_job
+from control import config
 import json
 import uuid
 
@@ -17,14 +16,15 @@ def simulate():
     parameters = json.loads(flask_request.data)
     magnet_config = parameters["shape"]
     n_jobs = parameters.get("n_jobs", 6)
+    n_events = parameters.get("n_events", None)
     job_uuid: str = str(uuid.uuid4())
 
     Thread(target=run_job.run_simulation, kwargs=dict(
         magnet_config=magnet_config,
         job_uuid=job_uuid,
-        n_jobs=n_jobs
-    )
-           ).start()
+        n_jobs=n_jobs,
+        n_events=n_events)
+    ).start()
     return job_uuid
 
 
