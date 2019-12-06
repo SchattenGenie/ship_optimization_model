@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import json
 import os
+import sys
 import subprocess
 import shutil
 import json
@@ -36,6 +37,12 @@ def status_checker(job):
         return 'failed'
     return 'wait'
 
+def job_status(jobs_status):
+    if 'failed' in jobs_status:
+        return 'failed'
+    elif all([status == 'succeeded' for status in jobs_status]):
+        return 'exited'
+    return 'wait'
 
 def run_simulation(magnet_config, job_uuid, n_jobs, n_events):
     # make random directory for ship docker
@@ -45,6 +52,8 @@ def run_simulation(magnet_config, job_uuid, n_jobs, n_events):
     flask_host_dir = os.path.abspath(flask_host_dir)
     host_outer_dir = '{}/{}'.format(config.HOST_DIRECTORY, input_dir)
     os.mkdir(flask_host_dir)
+    sys.stdout = open(os.path.join(flask_host_dir, "out.txt"), "w", buffering=1)
+    sys.stderr = open(os.path.join(flask_host_dir, "err.txt"), "w", buffering=1)
 
     # save magnet config for ship
     # in host directory
@@ -83,7 +92,8 @@ def run_simulation(magnet_config, job_uuid, n_jobs, n_events):
         JOB_SPEC["spec"]["template"]["spec"]["containers"][0]["command"].append(str(chunk_size))
         JOB_SPEC["spec"]["template"]["spec"]["containers"][0]["command"].append(str(start_event_num))
         JOB_SPEC["spec"]["template"]["spec"]["containers"][0]["command"].append(config.DATA_FILE)
-        print(JOB_SPEC)
+        # JOB_SPEC["spec"]["template"]["spec"]["containers"][0]["command"].append(os.path.join(config.SHIP_CONTAINER_DIRECTORY, "ship_logs.txt"))
+        # print(JOB_SPEC)
         job_spec_config_file = os.path.join(flask_host_dir_part, "job_spec.json")
         with open(job_spec_config_file, 'w', encoding='utf-8') as f:
             json.dump(JOB_SPEC, f, ensure_ascii=False, indent=4)
@@ -95,7 +105,7 @@ def run_simulation(magnet_config, job_uuid, n_jobs, n_events):
     result = {
         'uuid': uuids,
         'container_id': [job.obj['metadata']['name'] for job in jobs],
-        'container_status': [job.obj['status'] for job in jobs],
+        'container_status': job_status([status_checker(job) for job in jobs]),
         'message': None
     }
     redis.set(job_uuid, json.dumps(result))
@@ -108,12 +118,14 @@ def run_simulation(magnet_config, job_uuid, n_jobs, n_events):
         while not finished:
             statuses = []
             time.sleep(10)
-            print([job.obj['status'] for job in jobs])
-            for job in jobs:
+            # print([job.obj['status'] for job in jobs])
+            for index, job in enumerate(jobs):
                 status = 'wait'
                 try:
                     job.reload()
                     status = status_checker(job=job)
+                    if status == "succeeded":
+                        print("JOB: {} finished".format(index))
                 except requests.exceptions.HTTPError as e:
                     # except only internet errors
                     print(e, traceback.print_exc())
@@ -123,11 +135,13 @@ def run_simulation(magnet_config, job_uuid, n_jobs, n_events):
             else:
                 finished = True
         time.sleep(60)
-        print(os.listdir(flask_host_dir))
+        # print(os.listdir(flask_host_dir))
 
         # collect data from succesfully finished jobs
         optimise_inputs = []
         for part_number, job in enumerate(jobs):
+            with open('{}/{}'.format("{}/part_{}".format(flask_host_dir, part_number), 'job_status.json'), 'w') as j:
+                json.dump(job.obj, j)
             if status_checker(job=job) == 'succeeded':
                 with open('{}/{}'.format("{}/part_{}".format(flask_host_dir, part_number), 'optimise_input.json'), 'r') as j:
                     optimise_input = json.loads(j.read())
@@ -136,14 +150,16 @@ def run_simulation(magnet_config, job_uuid, n_jobs, n_events):
         kinematics = sum([optimise_input["kinematics"] for optimise_input in optimise_inputs], [])
         params = sum([optimise_input["params"] for optimise_input in optimise_inputs], [])
         veto_points = sum([optimise_input["veto_points"] for optimise_input in optimise_inputs], [])
-        l = sum([optimise_input["l"] for optimise_input in optimise_inputs], [])
-        w = sum([optimise_input["w"] for optimise_input in optimise_inputs], [])
+        l = [optimise_input["l"] for optimise_input in optimise_inputs]
+        l = l[0] if l else None
+        w = [optimise_input["w"] for optimise_input in optimise_inputs]
+        w = w[0] if w else None
 
-        print([job.obj for job in jobs])
+        # print([job.obj for job in jobs])
         result = {
             'uuid': uuids,
             'container_id': [job.obj['metadata']['name'] for job in jobs],
-            'container_status': [job.obj['status'] for job in jobs],
+            'container_status': job_status([status_checker(job) for job in jobs]),
             'kinematics': kinematics,
             "params": params,
             "veto_points": veto_points,
@@ -158,14 +174,14 @@ def run_simulation(magnet_config, job_uuid, n_jobs, n_events):
         result = {
             'uuid': uuids,
             'container_id': [job.obj['metadata']['name'] for job in jobs],
-            'container_status': [job.obj['status'] for job in jobs],
+            'container_status': job_status([status_checker(job) for job in jobs]),
             'muons_momentum': None,
             'veto_points': None,
             'message': traceback.format_exc()
         }
         redis.set(job_uuid, json.dumps(result))
     # shutil.rmtree(flask_host_dir)
-    print(os.listdir(flask_host_dir))
+    # print(os.listdir(flask_host_dir))
     return result
 
 
