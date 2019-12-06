@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 from flask import Flask, jsonify
 from flask import request as flask_request
-from threading import Thread
+#from threading import Thread
+from multiprocessing import Process
 from control import run_job
 from control import config
 import json
@@ -19,7 +20,7 @@ def simulate():
     n_events = parameters.get("n_events", None)
     job_uuid: str = str(uuid.uuid4())
 
-    Thread(target=run_job.run_simulation, kwargs=dict(
+    Process(target=run_job.run_simulation, kwargs=dict(
         magnet_config=magnet_config,
         job_uuid=job_uuid,
         n_jobs=n_jobs,
