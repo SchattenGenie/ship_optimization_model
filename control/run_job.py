@@ -77,7 +77,7 @@ def run_simulation(magnet_config, job_uuid, n_jobs, n_events):
     for part_number in range(n_jobs):
         start_event_num = chunk_size * part_number
         if part_number + 1 == n_jobs:
-            chunk_size += N_EVENTS % n_jobs
+            chunk_size += N_EVENTS % n_jobs - 1
         JOB_SPEC = deepcopy(config.JOB_SPEC)
         flask_host_dir_part = '{}/part_{}'.format(flask_host_dir, part_number)
         host_outer_dir_part = '{}/part_{}'.format(host_outer_dir, part_number)
@@ -148,7 +148,8 @@ def run_simulation(magnet_config, job_uuid, n_jobs, n_events):
                 optimise_inputs.append(optimise_input)
 
         kinematics = sum([optimise_input["kinematics"] for optimise_input in optimise_inputs], [])
-        params = sum([optimise_input["params"] for optimise_input in optimise_inputs], [])
+        params = [optimise_input["params"] for optimise_input in optimise_inputs]
+        params = params[0] if params else None
         veto_points = sum([optimise_input["veto_points"] for optimise_input in optimise_inputs], [])
         l = [optimise_input["l"] for optimise_input in optimise_inputs]
         l = l[0] if l else None
