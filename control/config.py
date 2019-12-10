@@ -26,7 +26,7 @@ JOB_SPEC = {
         "containers": [
           {
             "name": "ship",
-            "image": "vbelavin/ship_full",
+            "image": "shir994/fairship:k8s_mount_logs_v3",
             "command": [
               "alienv",
               "setenv",

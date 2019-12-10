@@ -8,7 +8,7 @@ import ROOT
 import os
 
 
-def check_acceptance(hit, bound=(330, 530)):
+def check_acceptance(hit, bound=(350, 550)):
     """
     :param hit:
     :param bound: acceptance bounds (X,Y) in cm
