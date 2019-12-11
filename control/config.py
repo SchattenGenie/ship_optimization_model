@@ -38,10 +38,12 @@ JOB_SPEC = {
             ],
             "resources": {
               "requests": {
-                "memory": "5Gi",
+                "memory": "1.2Gi",
+                "cpu": "1"
               },
               "limits": {
-                "memory": "5Gi",
+                "memory": "1.2Gi",
+                "cpu": "1"
               }
             },
             "volumeMounts": [
