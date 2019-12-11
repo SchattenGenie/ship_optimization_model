@@ -137,6 +137,7 @@ def run_simulation(magnet_config, job_uuid, n_jobs, n_events):
         time.sleep(60)
         # print(os.listdir(flask_host_dir))
 
+
         # collect data from succesfully finished jobs
         optimise_inputs = []
         for part_number, job in enumerate(jobs):
@@ -175,7 +176,7 @@ def run_simulation(magnet_config, job_uuid, n_jobs, n_events):
         result = {
             'uuid': uuids,
             'container_id': [job.obj['metadata']['name'] for job in jobs],
-            'container_status': job_status([status_checker(job) for job in jobs]),
+            'container_status': 'failed',
             'muons_momentum': None,
             'veto_points': None,
             'message': traceback.format_exc()
@@ -192,7 +193,7 @@ def get_result(job_uuid):
         return {
             'uuid': None,
             'container_id': None,
-            'container_status': 'failed',
+            'container_status': 'wait',
             'muons_momentum': None,
             'veto_points': None
         }
