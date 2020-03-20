@@ -12,6 +12,7 @@ SHIP_CONTAINER_DIRECTORY = '/root/host_directory'
 SHIP_MUON_DIRECTORY = '/ship/muon_input'
 DATA_FILE = "reweighted_input_test.root"
 EVENTS_TOTAL = 485879
+TIME_LIMIT = 45.  # time limit per job in minutes
 
 JOB_SPEC = {
   "apiVersion": "batch/v1",
