@@ -1,4 +1,4 @@
-FROM ubuntu:18.10
+FROM ubuntu:18.04
 RUN apt-get update && \
     apt-get install -y --no-install-recommends python3 python3-dev python3-pip nginx \
     gcc git wget g++ build-essential python3-setuptools apt-transport-https \
@@ -12,5 +12,5 @@ RUN apt-get update && \
 
 
 USER root
-EXPOSE 5432
+EXPOSE 5444
 WORKDIR /ship_shield_optimisation
