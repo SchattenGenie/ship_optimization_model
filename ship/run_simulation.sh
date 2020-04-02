@@ -1,5 +1,5 @@
 # ls -lthaR /root/host_directory/
-echo $AZKEY
+set -x;
 ./azcopy copy "https://shipfs.file.core.windows.net/data/$4?$AZKEY" /ship/muon_input/
 ls -lthaR /ship/muon_input/
 time python run_simulation.py --shield_params $1 --n_events $2 --first_event $3 --file_name $4 |& tee /ship/shield_files/outputs/ship_logs.txt
