@@ -66,6 +66,7 @@ JOB_SPEC = {
             ]
           }
         ],
+        "hostNetwork": True,
         "restartPolicy": "Never",
         "volumes": [
           # {
@@ -77,10 +78,7 @@ JOB_SPEC = {
           # },
           {
             "name": "muon",
-            "hostPath": {
-              "path": HOST_MUON_DIRECTORY,
-              "type": "Directory"
-            }
+            "emptyDir": {}
           }
         ]
       }
