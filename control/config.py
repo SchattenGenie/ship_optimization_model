@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import os
 
 # parameters of server
 HOST = '0.0.0.0'
-PORT = '5433'
+PORT = '5444'
 K8S_PROXY = 'http://127.0.0.1:8002'
+AZ_DIRECTORY = 'temp'
 HOST_DIRECTORY = '/mnt/shipfs/temp'
 HOST_MUON_DIRECTORY = '/mnt/shipfs'
 FLASK_CONTAINER_DIRECTORY = '/root/temp'
@@ -27,7 +29,13 @@ JOB_SPEC = {
         "containers": [
           {
             "name": "ship",
-            "image": "shir994/fairship:k8s_mount_logs_v3",
+            "env": [
+              {
+                "name": "AZKEY",
+                "value": os.environ["AZKEY"],
+              }
+            ],
+            "image": "shir994/fairship:k8s_mount_logs_v4",
             "command": [
               "alienv",
               "setenv",
@@ -48,33 +56,12 @@ JOB_SPEC = {
               }
             },
             "volumeMounts": [
-              {
-                "mountPath": SHIP_CONTAINER_DIRECTORY,
-                "name": "data"
-              },
-              {
-                "mountPath": SHIP_MUON_DIRECTORY,
-                "name": "muon"
-              }
             ]
           }
         ],
+        "hostNetwork": True,
         "restartPolicy": "Never",
         "volumes": [
-          {
-            "name": "data",
-            "hostPath": {
-              "path": "{}/{}",
-              "type": "Directory"
-            }
-          },
-          {
-            "name": "muon",
-            "hostPath": {
-              "path": HOST_MUON_DIRECTORY,
-              "type": "Directory"
-            }
-          }
         ]
       }
     },

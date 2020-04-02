@@ -12,5 +12,5 @@ RUN apt-get update && \
 
 
 USER root
-EXPOSE 5432
+EXPOSE 5444
 WORKDIR /ship_shield_optimisation
