@@ -4,8 +4,8 @@ from flask import Flask, jsonify
 from flask import request as flask_request
 # from threading import Thread
 from multiprocessing import Process
-import run_job
-import config
+from control import run_job
+from control import config
 import json
 import uuid
 

@@ -17,7 +17,7 @@ from redis import Redis
 import traceback
 import pykube
 from copy import deepcopy
-import config
+from control import config
 
 config_k8s = pykube.KubeConfig.from_url(config.K8S_PROXY)
 api = pykube.HTTPClient(config_k8s)

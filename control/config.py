@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import credentials
+import os
 
 # parameters of server
 HOST = '0.0.0.0'
@@ -31,10 +31,10 @@ JOB_SPEC = {
             "env": [
               {
                 "name": "AZKEY",
-                "value": credentials.AZKEY,
+                "value": os.environ["AZKEY"],
               }
             ],
-            "image": "vbelavin/ship_full",  # shir994/fairship:k8s_mount_logs_v3
+            "image": "shir994/fairship:k8s_mount_logs_v4",
             "command": [
               "alienv",
               "setenv",
