@@ -18,6 +18,8 @@ import traceback
 import pykube
 from copy import deepcopy
 from control import config
+import datetime
+from dateutil import parser, tz
 
 config_k8s = pykube.KubeConfig.from_url(config.K8S_PROXY)
 api = pykube.HTTPClient(config_k8s)
@@ -38,11 +40,19 @@ def status_checker(job):
     return 'wait'
 
 
+# def job_status(jobs_status):
+#     if 'failed' in jobs_status:
+#         return 'failed'
+#     elif all([status == 'succeeded' for status in jobs_status]):
+#         return 'exited'
+#     return 'wait'
+
+# Consider job successful if at least one portion was calculated
 def job_status(jobs_status):
-    if 'failed' in jobs_status:
-        return 'failed'
-    elif all([status == 'succeeded' for status in jobs_status]):
+    if "succeeded" in jobs_status:
         return 'exited'
+    elif 'failed' in jobs_status:
+        return 'failed'
     return 'wait'
 
 
@@ -116,6 +126,7 @@ def run_simulation(magnet_config, job_uuid, n_jobs, n_events):
     print(os.listdir(flask_host_dir))
     finished = False
     print([job.obj for job in jobs])
+    start_time = time.time()
     try:
         while not finished:
             statuses = []
@@ -127,6 +138,12 @@ def run_simulation(magnet_config, job_uuid, n_jobs, n_events):
                     status = status_checker(job=job)
                     if status == "succeeded":
                         print("JOB: {} finished".format(index))
+                    elif status == "wait":
+                        job_start_time = parser.parse(job.obj["metadata"]["creationTimestamp"])
+                        dt = (datetime.datetime.now(tz.tzlocal()) - job_start_time).seconds / 60
+                        print("JOB: {}, DT {}:".format(index, dt))
+                        if dt > config.TIME_LIMIT:
+                            status = "failed"
                 except requests.exceptions.HTTPError as e:
                     # except only internet errors
                     print(e, traceback.print_exc())
@@ -135,7 +152,7 @@ def run_simulation(magnet_config, job_uuid, n_jobs, n_events):
                 finished = False
             else:
                 finished = True
-        time.sleep(60)
+        time.sleep(20)
         # print(os.listdir(flask_host_dir))
 
 
@@ -144,7 +161,8 @@ def run_simulation(magnet_config, job_uuid, n_jobs, n_events):
         for part_number, job in enumerate(jobs):
             with open('{}/{}'.format("{}/part_{}".format(flask_host_dir, part_number), 'job_status.json'), 'w') as j:
                 json.dump(job.obj, j)
-            if status_checker(job=job) == 'succeeded':
+            if status_checker(job=job) == 'succeeded' and \
+               os.path.exists('{}/{}'.format("{}/part_{}".format(flask_host_dir, part_number), 'optimise_input.json')):
                 with open('{}/{}'.format("{}/part_{}".format(flask_host_dir, part_number), 'optimise_input.json'), 'r') as j:
                     optimise_input = json.loads(j.read())
                 optimise_inputs.append(optimise_input)

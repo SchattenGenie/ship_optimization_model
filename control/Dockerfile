@@ -8,7 +8,7 @@ RUN apt-get update && \
     apt-get update && apt-get install -y kubectl && \
     apt-get clean -y && rm -rf /var/lib/apt/lists/* && \
     pip3 install wheel && \
-    pip3 install uwsgi numpy scipy Flask requests schema redis pykube
+    pip3 install uwsgi numpy scipy Flask requests schema redis pykube python-dateutil
 
 
 USER root
