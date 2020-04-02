@@ -55,31 +55,12 @@ JOB_SPEC = {
               }
             },
             "volumeMounts": [
-              # {
-              #   "mountPath": SHIP_CONTAINER_DIRECTORY,
-              #   "name": "data"
-              # },
-              {
-                "mountPath": SHIP_MUON_DIRECTORY,
-                "name": "muon"
-              }
             ]
           }
         ],
         "hostNetwork": True,
         "restartPolicy": "Never",
         "volumes": [
-          # {
-          #   "name": "data",
-          #   "hostPath": {
-          #     "path": "{}/{}",
-          #     "type": "Directory"
-          #  }
-          # },
-          {
-            "name": "muon",
-            "emptyDir": {}
-          }
         ]
       }
     },

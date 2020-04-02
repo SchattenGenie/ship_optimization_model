@@ -83,21 +83,18 @@ def run_simulation(magnet_config, job_uuid, n_jobs, n_events):
             chunk_size += N_EVENTS % n_jobs - 1
         JOB_SPEC = deepcopy(config.JOB_SPEC)
         flask_host_dir_part = '{}/part_{}'.format(flask_host_dir, part_number)
-        # host_outer_dir_part = '{}/part_{}'.format(host_outer_dir, part_number)
         az_outer_dir_part = '{}/part_{}'.format(az_outer_dir, part_number)
         os.mkdir(flask_host_dir_part)
         magnet_config_path_part = os.path.join(flask_host_dir_part, "magnet_params.json")
         with open(magnet_config_path_part, 'w', encoding='utf-8') as f:
             json.dump(magnet_config, f, ensure_ascii=False, indent=4)
         per_job_uuid = "{}-{}".format(job_uuid, part_number)
-        # JOB_SPEC["spec"]["template"]["spec"]["volumes"][0]["hostPath"]["path"] = az_outer_dir_part
         JOB_SPEC["metadata"]["name"] = "ship-job-{}".format(per_job_uuid)
         JOB_SPEC["spec"]["template"]["spec"]["containers"][0]["command"].append(",".join(map(str, magnet_config)))
         JOB_SPEC["spec"]["template"]["spec"]["containers"][0]["command"].append(str(chunk_size))
         JOB_SPEC["spec"]["template"]["spec"]["containers"][0]["command"].append(str(start_event_num))
         JOB_SPEC["spec"]["template"]["spec"]["containers"][0]["command"].append(config.DATA_FILE)
         JOB_SPEC["spec"]["template"]["spec"]["containers"][0]["command"].append(az_outer_dir_part)
-        # JOB_SPEC["spec"]["template"]["spec"]["containers"][0]["command"].append(os.path.join(config.SHIP_CONTAINER_DIRECTORY, "ship_logs.txt"))
         # print(JOB_SPEC)
         job_spec_config_file = os.path.join(flask_host_dir_part, "job_spec.json")
         with open(job_spec_config_file, 'w', encoding='utf-8') as f:
