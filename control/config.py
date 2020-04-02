@@ -16,75 +16,75 @@ DATA_FILE = "reweighted_input_test.root"
 EVENTS_TOTAL = 485879
 
 JOB_SPEC = {
-  "apiVersion": "batch/v1",
-  "kind": "Job",
-  "metadata": {
-    "name": "ship-job-{}"
-  },
-  "spec": {
-    "ttlSecondsAfterFinished": 14400,
-    "template": {
-      "spec": {
-        "containers": [
-          {
-            "name": "ship",
-            "env": [
-              {
-                "name": "AZKEY",
-                "value": credentials.AZKEY,
-              }
-            ],
-            "image": "vbelavin/ship_full",  # shir994/fairship:k8s_mount_logs_v3
-            "command": [
-              "alienv",
-              "setenv",
-              "-w",
-              "/sw",
-              "FairShip/latest",
-              "-c",
-              "/ship/run_simulation.sh",
-            ],
-            "resources": {
-              "requests": {
-                "memory": "1.2Gi",
-                "cpu": "1"
-              },
-              "limits": {
-                "memory": "1.2Gi",
-                "cpu": "1"
-              }
-            },
-            "volumeMounts": [
-              # {
-              #   "mountPath": SHIP_CONTAINER_DIRECTORY,
-              #   "name": "data"
-              # },
-              {
-                "mountPath": SHIP_MUON_DIRECTORY,
-                "name": "muon"
-              }
-            ]
-          }
-        ],
-        "restartPolicy": "Never",
-        "volumes": [
-          # {
-          #   "name": "data",
-          #   "hostPath": {
-          #     "path": "{}/{}",
-          #     "type": "Directory"
-          #  }
-          # },
-          {
-            "name": "muon",
-            "hostPath": {
-              "path": HOST_MUON_DIRECTORY,
-              "type": "Directory"
-            }
-          }
-        ]
-      }
+    "apiVersion": "batch/v1",
+    "kind": "Job",
+    "metadata": {
+        "name": "ship-job-{}"
     },
-    "backoffLimit": 1
-  }
+    "spec": {
+        "ttlSecondsAfterFinished": 14400,
+        "template": {
+            "spec": {
+                "containers": [
+                    {
+                        "name": "ship",
+                        "env": [
+                            {
+                                "name": "AZKEY",
+                                "value": credentials.AZKEY,
+                            }
+                        ],
+                        "image": "vbelavin/ship_full",  # shir994/fairship:k8s_mount_logs_v3
+                        "command": [
+                            "alienv",
+                            "setenv",
+                            "-w",
+                            "/sw",
+                            "FairShip/latest",
+                            "-c",
+                            "/ship/run_simulation.sh",
+                        ],
+                        "resources": {
+                            "requests": {
+                                "memory": "1.2Gi",
+                                "cpu": "1"
+                            },
+                            "limits": {
+                                "memory": "1.2Gi",
+                                "cpu": "1"
+                            }
+                        },
+                        "volumeMounts": [
+                            # {
+                            #    "mountPath": SHIP_CONTAINER_DIRECTORY,
+                            #    "name": "data"
+                            # },
+                            # {
+                            #   "mountPath": SHIP_MUON_DIRECTORY,
+                            #   "name": "muon"
+                            # }
+                        ]
+                    }
+                ],
+                "restartPolicy": "Never",
+                "volumes": [
+                    {
+                        "name": "data",
+                        "hostPath": {
+                            "path": "{}/{}",
+                            "type": "Directory"
+                        },
+                        # },
+                        # {
+                        #   "name": "muon",
+                        #   "hostPath": {
+                        #     "path": HOST_MUON_DIRECTORY,
+                        #     "type": "Directory"
+                        # }
+                    }
+                ]
+            }
+        },
+        "backoffLimit": 1
+    }
 }
