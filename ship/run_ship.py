@@ -15,11 +15,13 @@ import saveBasicParameters
 
 
 class SHIPRunner(object):
-    def __init__(self, shield_geofile, same_seed=1, file_name="muon_input/pythia8_Geant4_10.0_withCharmandBeauty0_mu.root"):
+    def __init__(self, shield_geofile, same_seed=1, file_name="muon_input/pythia8_Geant4_10.0_withCharmandBeauty0_mu.root",
+                 step_geo=False):
         self.firstEvent = 0
         self.dy = 10.
-        self.vessel_design = 5
+        self.vessel_design = 6
         self.shield_design = 8
+        self.tau_target_design = 3 #dummy value
         self.mcEngine = 'TGeant4'
         self.same_seed = same_seed
         self.theSeed = 1
@@ -28,6 +30,7 @@ class SHIPRunner(object):
         self.output_dir = "./shield_files/outputs/"
         self.output_file = os.path.join(self.output_dir, "ship.conical.MuonBack-TGeant4.root")
         self.input_file = os.path.join("./muon_input", file_name)
+        self.step_geo = step_geo
 
     def run_ship(self, phiRandom=False, followMuon=True, n_events=-1, first_event=0):
         """
@@ -44,7 +47,10 @@ class SHIPRunner(object):
             Yheight=self.dy,
             tankDesign=self.vessel_design,
             muShieldDesign=self.shield_design,
-            muShieldGeo=self.shield_geo_file)
+            muShieldGeo=self.shield_geo_file,
+            muShieldStepGeo=self.step_geo,
+            nuTauTargetDesign=self.tau_target_design
+        )
 
         run = r.FairRunSim()
         run.SetName(self.mcEngine)  # Transport engine

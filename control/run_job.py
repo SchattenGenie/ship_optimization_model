@@ -104,6 +104,7 @@ def run_simulation(magnet_config, job_uuid, n_jobs, n_events):
         JOB_SPEC["spec"]["template"]["spec"]["containers"][0]["command"].append(str(chunk_size))
         JOB_SPEC["spec"]["template"]["spec"]["containers"][0]["command"].append(str(start_event_num))
         JOB_SPEC["spec"]["template"]["spec"]["containers"][0]["command"].append(config.DATA_FILE)
+        JOB_SPEC["spec"]["template"]["spec"]["containers"][0]["command"].append(str(config.STEP_GEO))
         JOB_SPEC["spec"]["template"]["spec"]["containers"][0]["command"].append(az_outer_dir_part)
         # print(JOB_SPEC)
         job_spec_config_file = os.path.join(flask_host_dir_part, "job_spec.json")

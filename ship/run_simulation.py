@@ -11,9 +11,10 @@ parser.add_argument("--shield_params", type=str)
 parser.add_argument("--n_events", type=int, default=1000)
 parser.add_argument("--first_event", type=int, default=0)
 parser.add_argument("--file_name", type=str, default="muon_input/pythia8_Geant4_10.0_withCharmandBeauty0_mu.root")
+parser.add_argument("--step_geo", type=bool, default=False)
 
 
-def main(shield_params, n_events, first_event, file_name):
+def main(shield_params, n_events, first_event, file_name, step_geo):
     """
     Gets vector of optimised shield parameters(not full one), run SHiP simulation
     saves dict of magnet length, weight, optimised_paramteters, input kinematics and output hit distribution
@@ -24,7 +25,7 @@ def main(shield_params, n_events, first_event, file_name):
     gm = GeometryManipulator()
 
     geofile = gm.generate_magnet_geofile("magnet_geo.root", list(gm.input_fixed_params(shield_params)))
-    ship_runner = SHIPRunner(geofile, file_name=file_name)
+    ship_runner = SHIPRunner(geofile, file_name=file_name, step_geo=step_geo)
     fair_runner = ship_runner.run_ship(n_events=n_events, first_event=first_event)
 
     l, w, tracker_ends = gm.extract_l_and_w(geofile, "full_ship_geofile.root", fair_runner)
@@ -51,5 +52,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
     main(
         shield_params=args.shield_params, n_events=args.n_events,
-        first_event=args.first_event, file_name=args.file_name
+        first_event=args.first_event, file_name=args.file_name,
+        step_geo=args.step_geo
     )

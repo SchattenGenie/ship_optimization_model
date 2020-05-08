@@ -14,7 +14,8 @@ SHIP_CONTAINER_DIRECTORY = '/root/host_directory'
 SHIP_MUON_DIRECTORY = '/ship/muon_input'
 DATA_FILE = "reweighted_input_test.root"
 EVENTS_TOTAL = 485879
-TIME_LIMIT = 45.  # time limit per job in minutes
+STEP_GEO = True
+TIME_LIMIT = 55.  # time limit per job in minutes
 
 JOB_SPEC = {
   "apiVersion": "batch/v1",
@@ -35,7 +36,7 @@ JOB_SPEC = {
                 "value": os.environ["AZKEY"],
               }
             ],
-            "image": "shir994/fairship:k8s_mount_logs_v4",
+            "image": "shir994/fairship:k8s_mount_logs_v5",
             "command": [
               "alienv",
               "setenv",

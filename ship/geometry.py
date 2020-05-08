@@ -70,8 +70,9 @@ class GeometryManipulator(object):
             ship_geo = ConfigRegistry.loadpy(
                 '$FAIRSHIP/geometry/geometry_config.py',
                 Yheight=10,
-                tankDesign=5,
+                tankDesign=6,
                 muShieldDesign=8,
+                nuTauTargetDesign=3,
                 muShieldGeo=os.path.join(self.geometry_dir, magnet_geofile))
 
             print
