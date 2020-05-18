@@ -18,13 +18,15 @@ def simulate():
     magnet_config = parameters["shape"]
     n_jobs = parameters.get("n_jobs", 6)
     n_events = parameters.get("n_events", None)
+    input_file = parameters.get("input_file")
     job_uuid: str = str(uuid.uuid4())
 
     Process(target=run_job.run_simulation, kwargs=dict(
         magnet_config=magnet_config,
         job_uuid=job_uuid,
         n_jobs=n_jobs,
-        n_events=n_events)
+        n_events=n_events,
+        input_file=input_file)
     ).start()
     return job_uuid
 

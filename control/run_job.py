@@ -56,7 +56,7 @@ def job_status(jobs_status):
     return 'wait'
 
 
-def run_simulation(magnet_config, job_uuid, n_jobs, n_events):
+def run_simulation(magnet_config, job_uuid, n_jobs, n_events, input_file):
     # make random directory for ship docker
     # to store input files and output files
     input_dir = 'input_dir_{}'.format(job_uuid)
@@ -103,7 +103,7 @@ def run_simulation(magnet_config, job_uuid, n_jobs, n_events):
         JOB_SPEC["spec"]["template"]["spec"]["containers"][0]["command"].append(",".join(map(str, magnet_config)))
         JOB_SPEC["spec"]["template"]["spec"]["containers"][0]["command"].append(str(chunk_size))
         JOB_SPEC["spec"]["template"]["spec"]["containers"][0]["command"].append(str(start_event_num))
-        JOB_SPEC["spec"]["template"]["spec"]["containers"][0]["command"].append(config.DATA_FILE)
+        JOB_SPEC["spec"]["template"]["spec"]["containers"][0]["command"].append(input_file)
         JOB_SPEC["spec"]["template"]["spec"]["containers"][0]["command"].append(str(config.STEP_GEO))
         JOB_SPEC["spec"]["template"]["spec"]["containers"][0]["command"].append(az_outer_dir_part)
         # print(JOB_SPEC)
@@ -129,6 +129,7 @@ def run_simulation(magnet_config, job_uuid, n_jobs, n_events):
     print([job.obj for job in jobs])
     start_time = time.time()
     try:
+
         while not finished:
             statuses = []
             time.sleep(10)
@@ -145,6 +146,8 @@ def run_simulation(magnet_config, job_uuid, n_jobs, n_events):
                         print("JOB: {}, DT {}:".format(index, dt))
                         if dt > config.TIME_LIMIT:
                             status = "failed"
+                            print("TIME LIMIT per job exceeded, deleting: {}".format(job.obj['metadata']['name']))
+                            job.delete()
                 except requests.exceptions.HTTPError as e:
                     # except only internet errors
                     print(e, traceback.print_exc())
@@ -177,11 +180,13 @@ def run_simulation(magnet_config, job_uuid, n_jobs, n_events):
         w = [optimise_input["w"] for optimise_input in optimise_inputs]
         w = w[0] if w else None
 
-        # print([job.obj for job in jobs])
+        status = job_status([status_checker(job) for job in jobs])
+        if not optimise_inputs:
+            status = "failed"
         result = {
             'uuid': uuids,
             'container_id': [job.obj['metadata']['name'] for job in jobs],
-            'container_status': job_status([status_checker(job) for job in jobs]),
+            'container_status': status,
             'kinematics': kinematics,
             "params": params,
             "veto_points": veto_points,

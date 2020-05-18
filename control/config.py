@@ -12,10 +12,10 @@ HOST_MUON_DIRECTORY = '/mnt/shipfs'
 FLASK_CONTAINER_DIRECTORY = '/root/temp'
 SHIP_CONTAINER_DIRECTORY = '/root/host_directory'
 SHIP_MUON_DIRECTORY = '/ship/muon_input'
-DATA_FILE = "reweighted_input_test.root"
-EVENTS_TOTAL = 485879
+# DATA_FILE = "reweighted_input_test.root"
+EVENTS_TOTAL = 100_000_000 # 485879 effectively remove limit to use GAN sampling
 STEP_GEO = True
-TIME_LIMIT = 55.  # time limit per job in minutes
+TIME_LIMIT = 60  # time limit per job in minutes
 
 JOB_SPEC = {
   "apiVersion": "batch/v1",
@@ -36,7 +36,7 @@ JOB_SPEC = {
                 "value": os.environ["AZKEY"],
               }
             ],
-            "image": "shir994/fairship:k8s_mount_logs_v5",
+            "image": "shir994/fairship:k8s_mount_logs_v6",
             "command": [
               "alienv",
               "setenv",
