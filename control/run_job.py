@@ -128,12 +128,15 @@ def run_simulation(magnet_config, job_uuid, n_jobs, n_events, input_file):
     finished = False
     print([job.obj for job in jobs])
     start_time = time.time()
+    failed_jobs = set()
     try:
-
         while not finished:
             statuses = []
             time.sleep(10)
             for index, job in enumerate(jobs):
+                if index in failed_jobs:
+                    statuses.append('failed')
+                    continue
                 status = 'wait'
                 try:
                     job.reload()
@@ -148,6 +151,7 @@ def run_simulation(magnet_config, job_uuid, n_jobs, n_events, input_file):
                             status = "failed"
                             print("TIME LIMIT per job exceeded, deleting: {}".format(job.obj['metadata']['name']))
                             job.delete()
+                            failed_jobs.add(index)
                 except requests.exceptions.HTTPError as e:
                     # except only internet errors
                     print(e, traceback.print_exc())
@@ -163,6 +167,8 @@ def run_simulation(magnet_config, job_uuid, n_jobs, n_events, input_file):
         # collect data from succesfully finished jobs
         optimise_inputs = []
         for part_number, job in enumerate(jobs):
+            if part_number in failed_jobs:
+                continue
             with open('{}/{}'.format("{}/part_{}".format(flask_host_dir, part_number), 'job_status.json'), 'w') as j:
                 json.dump(job.obj, j)
             if status_checker(job=job) == 'succeeded' and \

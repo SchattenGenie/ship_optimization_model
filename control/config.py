@@ -15,7 +15,7 @@ SHIP_MUON_DIRECTORY = '/ship/muon_input'
 # DATA_FILE = "reweighted_input_test.root"
 EVENTS_TOTAL = 100_000_000 # 485879 effectively remove limit to use GAN sampling
 STEP_GEO = True
-TIME_LIMIT = 60  # time limit per job in minutes
+TIME_LIMIT = 85  # time limit per job in minutes
 
 JOB_SPEC = {
   "apiVersion": "batch/v1",
@@ -48,11 +48,11 @@ JOB_SPEC = {
             ],
             "resources": {
               "requests": {
-                "memory": "1.2Gi",
+                "memory": "1.4Gi",
                 "cpu": "1"
               },
               "limits": {
-                "memory": "1.2Gi",
+                "memory": "1.4Gi",
                 "cpu": "1"
               }
             },
