@@ -1,0 +1,1 @@
+GEOFILE = "magnet_geo.root"

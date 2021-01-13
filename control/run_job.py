@@ -21,7 +21,8 @@ from control import config
 import datetime
 from dateutil import parser, tz
 
-config_k8s = pykube.KubeConfig.from_url(config.K8S_PROXY)
+#config_k8s = pykube.KubeConfig.from_url(config.K8S_PROXY)
+config_k8s = pykube.KubeConfig.from_file(config.K8S_CONFIG)
 api = pykube.HTTPClient(config_k8s)
 api.timeout = 1e6
 redis = Redis()
@@ -56,7 +57,7 @@ def job_status(jobs_status):
     return 'wait'
 
 
-def run_simulation(magnet_config, job_uuid, n_jobs, n_events, input_file):
+def run_simulation(magnet_config, job_uuid, n_jobs, n_events, input_file, const_field):
     # make random directory for ship docker
     # to store input files and output files
     input_dir = 'input_dir_{}'.format(job_uuid)

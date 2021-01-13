@@ -11,3 +11,4 @@ WORKDIR /ship
 RUN mkdir ./shield_files ./shield_files/geometry/ ./shield_files/outputs/ ./muon_input
 
 RUN wget -O azcopy_v10.tar.gz https://aka.ms/downloadazcopy-v10-linux && tar -xf azcopy_v10.tar.gz --strip-components=1
+RUN alienv setenv -w /sw FairShip/latest -c pip3 install pandas

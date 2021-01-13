@@ -6,6 +6,7 @@ import os
 HOST = '0.0.0.0'
 PORT = '5444'
 K8S_PROXY = 'http://127.0.0.1:8002'
+K8S_CONFIG = '/kube_config/config'
 AZ_DIRECTORY = 'temp'
 HOST_DIRECTORY = '/mnt/shipfs/temp'
 HOST_MUON_DIRECTORY = '/mnt/shipfs'
@@ -48,11 +49,11 @@ JOB_SPEC = {
             ],
             "resources": {
               "requests": {
-                "memory": "1.4Gi",
+                "memory": "1.9Gi",
                 "cpu": "1"
               },
               "limits": {
-                "memory": "1.4Gi",
+                "memory": "1.9Gi",
                 "cpu": "1"
               }
             },

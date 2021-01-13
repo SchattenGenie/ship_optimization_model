@@ -19,6 +19,7 @@ def simulate():
     n_jobs = parameters.get("n_jobs", 6)
     n_events = parameters.get("n_events", None)
     input_file = parameters.get("input_file")
+    const_field = parameters.get("const_field")
     job_uuid: str = str(uuid.uuid4())
 
     Process(target=run_job.run_simulation, kwargs=dict(
@@ -26,7 +27,8 @@ def simulate():
         job_uuid=job_uuid,
         n_jobs=n_jobs,
         n_events=n_events,
-        input_file=input_file)
+        input_file=input_file,
+        const_field=const_field)
     ).start()
     return job_uuid
 

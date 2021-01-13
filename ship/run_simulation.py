@@ -5,30 +5,29 @@ from run_ship import SHIPRunner
 from geometry import GeometryManipulator
 from utils import process_file
 import argparse
+from constants import *
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--shield_params", type=str)
 parser.add_argument("--n_events", type=int, default=1000)
 parser.add_argument("--first_event", type=int, default=0)
 parser.add_argument("--file_name", type=str, default="muon_input/pythia8_Geant4_10.0_withCharmandBeauty0_mu.root")
-parser.add_argument("--step_geo", type=bool, default=False)
+parser.add_argument('--step_geo', default=False, action='store_true')
+parser.add_argument('--const_field', default=False, action='store_true')
 
-
-def main(shield_params, n_events, first_event, file_name, step_geo):
+def main(shield_params, n_events, first_event, file_name, step_geo, const_field):
     """
     Gets vector of optimised shield parameters(not full one), run SHiP simulation
     saves dict of magnet length, weight, optimised_paramteters, input kinematics and output hit distribution
     :return:
     """
     shield_params = np.array([float(x.strip()) for x in shield_params.split(',')], dtype=float)
-    # print(shield_params)
-    gm = GeometryManipulator()
 
-    geofile = gm.generate_magnet_geofile("magnet_geo.root", list(gm.input_fixed_params(shield_params)))
-    ship_runner = SHIPRunner(geofile, file_name=file_name, step_geo=step_geo)
+    ship_runner = SHIPRunner(GEOFILE, file_name=file_name, step_geo=step_geo, const_field=const_field)
     fair_runner = ship_runner.run_ship(n_events=n_events, first_event=first_event)
 
-    l, w, tracker_ends = gm.extract_l_and_w(geofile, "full_ship_geofile.root", fair_runner)
+    gm = GeometryManipulator()
+    l, w, tracker_ends = gm.extract_l_and_w(GEOFILE, "full_ship_geofile.root", fair_runner)
     muons_stats = process_file(ship_runner.output_file, tracker_ends, apply_acceptance_cut=True, debug=False)
     if len(muons_stats) == 0:
         veto_points, muon_kinematics = np.array([]), np.array([])
@@ -53,5 +52,5 @@ if __name__ == '__main__':
     main(
         shield_params=args.shield_params, n_events=args.n_events,
         first_event=args.first_event, file_name=args.file_name,
-        step_geo=args.step_geo
+        step_geo=args.step_geo, const_field=args.const_field
     )

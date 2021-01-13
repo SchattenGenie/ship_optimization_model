@@ -12,11 +12,12 @@ import geomGeant4
 from ShipGeoConfig import ConfigRegistry
 import shipDet_conf
 import saveBasicParameters
+from ROOT import TVector3
 
 
 class SHIPRunner(object):
     def __init__(self, shield_geofile, same_seed=1, file_name="muon_input/pythia8_Geant4_10.0_withCharmandBeauty0_mu.root",
-                 step_geo=False):
+                 step_geo=False, const_field=True):
         self.firstEvent = 0
         self.dy = 10.
         self.vessel_design = 6
@@ -31,6 +32,7 @@ class SHIPRunner(object):
         self.output_file = os.path.join(self.output_dir, "ship.conical.MuonBack-TGeant4.root")
         self.input_file = os.path.join("./muon_input", file_name)
         self.step_geo = step_geo
+        self.const_field = const_field
 
     def run_ship(self, phiRandom=False, followMuon=True, n_events=-1, first_event=0):
         """
@@ -51,6 +53,9 @@ class SHIPRunner(object):
             muShieldStepGeo=self.step_geo,
             nuTauTargetDesign=self.tau_target_design
         )
+        ship_geo.muShield.WithConstField = self.const_field
+        print("CONST FIELD:{}".format(ship_geo.muShield.WithConstField))
+        print("STPEGEO:{}".format(self.step_geo))
 
         run = r.FairRunSim()
         run.SetName(self.mcEngine)  # Transport engine
@@ -80,6 +85,8 @@ class SHIPRunner(object):
         # geomGeant4.setMagnetField()
         if hasattr(ship_geo.Bfield, "fieldMap"):
             fieldMaker = geomGeant4.addVMCFields(ship_geo, '', True)
+        fieldMaker.plotField(1, TVector3(-7000.0, -3000.0, 10.0), TVector3(-300.0, 300.0, 6.0), os.path.join(self.output_dir, 'Bzx.png'))
+        fieldMaker.plotField(2, TVector3(-7000.0, -3000.0, 10.0), TVector3(-400.0, 400.0, 6.0), os.path.join(self.output_dir, 'Bzy.png'))
         print ('Start run of {} events.'.format(n_events))
         run.Run(n_events)
         print ('Finished simulation of {} events.'.format(n_events))
